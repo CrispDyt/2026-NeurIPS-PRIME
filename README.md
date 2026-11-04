@@ -4,7 +4,7 @@ Code and archived experiment inputs for **PRIME: Poincaré return induced measur
 
 This repository collects the paper-related implementations from the original NIPS and Entropy research folders. It includes training and evaluation for Lorenz63, Kuramoto–Sivashinsky (KS), and flow past a cylinder, together with selected baseline, ablation, timing, and plotting code. The source notebooks' output images, redundant checkpoints, logs, and large raw flow arrays are omitted.
 
-**Reproduction status:** the main tables can be rebuilt from the bundled raw results. The 60 main-experiment checkpoints and their exact input arrays are included. Historical seed/configuration inconsistencies and incomplete figure provenance are documented in [the coverage audit](docs/paper_coverage.md); the repository does not claim that every paper figure or historical training run has been reproduced exactly. 中文核对说明见 [整理与复现差异](docs/reproduction_audit_zh.md).
+**Reproduction status:** the main tables can be rebuilt from the bundled raw results. The 60 main-experiment checkpoints and their exact input arrays are included. Historical seed/configuration inconsistencies and incomplete figure provenance are documented in [the coverage audit](docs/paper_coverage.md); the repository does not claim that every paper figure or historical training run has been reproduced exactly. 
 
 ## Environment
 
