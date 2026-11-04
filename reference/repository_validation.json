@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-04",
+  "python_environment": "Python3.11 / torch2.1.2+cu121 / numpy1.26.0",
+  "pytest": "5 passed",
+  "public_cli_help_checks": 20,
+  "syntax_checks": "all experiments/scripts/tests compile",
+  "documentation_links": "all local Markdown links resolve",
+  "table_summary_numeric_comparisons": 539,
+  "table_summary_mismatches": 0,
+  "asset_count": 142,
+  "asset_bytes": 44554947,
+  "existing_output_guards_checked": [
+    "ks",
+    "cylinder",
+    "baselines"
+  ],
+  "full_retraining_performed": false,
+  "paper_coverage": "docs/paper_coverage.md"
+}

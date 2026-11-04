@@ -1,0 +1,105 @@
+{
+  "cwd": "outside_repository",
+  "checks": [
+    {
+      "script": "experiments/lorenz63/train.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/lorenz63/evaluate.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/ks/train.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/ks/evaluate.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/cylinder/train.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/cylinder/evaluate.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/baselines/train.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/baselines/evaluate.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/baselines/plot.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/cost/profile_training.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/cost/profile_inference.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/cost/profile_heterogeneous.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/figures/cylinder_forecast.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/data_generation/simulate_cylinder.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/data_generation/lorenz63.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/ks/prepare_data.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/rossler/train_dim.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/rossler/compare_delay.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "scripts/build_tables.py",
+      "returncode": 0,
+      "error": null
+    },
+    {
+      "script": "experiments/ablations/run.py",
+      "returncode": 0,
+      "error": null
+    }
+  ]
+}

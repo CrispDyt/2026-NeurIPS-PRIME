@@ -1,0 +1,21 @@
+seed,method,Attractor_W2,PSD_logL1,checkpoint
+33,PRIME,1.2470617294311523,0.41050434800058283,Lorenz/1-step MSE/1-step MSE 33/Implicit_BEST.p
+33,DIM only,72.80481719970703,5.617972232985409,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_only/seed_33/DIM_only_BEST_TOTAL_20260803_020639.p
+33,DIM + recurrence marginals,48.07024002075195,1.1370026420741854,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_33/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_025237.p
+33,DIM + pair-MSE + recurrence marginals,2.3767824172973633,0.4545033371923577,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_33/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_033726.p
+123,PRIME,18.418581008911133,0.6671091163972915,Lorenz/1-step MSE/1-step MSE 123/Implicit_BEST.p
+123,DIM only,73.492919921875,5.866675612418008,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_only/seed_123/DIM_only_BEST_TOTAL_20260803_033808.p
+123,DIM + recurrence marginals,74.84613037109375,6.325600318023044,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_123/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_042347.p
+123,DIM + pair-MSE + recurrence marginals,65.50909423828125,4.2407390497690916,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_123/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_050934.p
+1000,PRIME,1.5114176273345947,0.42365086054197454,Lorenz/1-step MSE/1-step MSE 1000/Implicit_BEST.p
+1000,DIM only,49.55488586425781,0.7750180471817105,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_only/seed_1000/DIM_only_BEST_TOTAL_20260803_051016.p
+1000,DIM + recurrence marginals,74.86563873291016,6.279130505818544,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_1000/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_055525.p
+1000,DIM + pair-MSE + recurrence marginals,53.69877624511719,3.020745086694502,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_1000/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_064046.p
+13532,PRIME,2.160506248474121,0.4137038211914418,Lorenz/1-step MSE/1-step MSE 13532/Implicit_BEST.p
+13532,DIM only,75.46844482421875,6.2492875321263135,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_only/seed_13532/DIM_only_BEST_TOTAL_20260803_064128.p
+13532,DIM + recurrence marginals,66.70738983154297,4.4810034032214485,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_13532/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_072624.p
+13532,DIM + pair-MSE + recurrence marginals,72.87848663330078,6.259707080429659,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_13532/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_104152.p
+123456,PRIME,2.8776302337646484,0.4369584188585177,Lorenz/1-step MSE/1-step MSE 123456/Implicit_BEST.p
+123456,DIM only,68.25782012939453,4.7069603734728895,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_only/seed_123456/DIM_only_BEST_TOTAL_20260803_104237.p
+123456,DIM + recurrence marginals,41.2798957824707,1.6103338849650906,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_123456/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_123813.p
+123456,DIM + pair-MSE + recurrence marginals,67.94371032714844,5.960369678989434,Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_123456/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_132913.p

@@ -1,0 +1,114 @@
+{
+  "numerical_reference_comparisons": [
+    {
+      "check": "Table5 schedule",
+      "n_rows": 4,
+      "numeric_columns": 16,
+      "maximum_absolute_difference": 0.0,
+      "tolerance": "rtol=2e-6, atol=1e-5 (float32 Sinkhorn rounding)"
+    },
+    {
+      "check": "Table5 section",
+      "n_rows": 4,
+      "numeric_columns": 65,
+      "maximum_absolute_difference": 0.0,
+      "tolerance": "rtol=2e-6, atol=1e-5 (float32 Sinkhorn rounding)"
+    },
+    {
+      "check": "Table6 fixed lags",
+      "n_rows": 5,
+      "numeric_columns": 2,
+      "maximum_absolute_difference": 0.0,
+      "tolerance": "rtol=2e-6, atol=1e-5 (float32 Sinkhorn rounding)"
+    },
+    {
+      "check": "Table6 variable and sequential lags",
+      "n_rows": 3,
+      "numeric_columns": 2,
+      "maximum_absolute_difference": 3.814697265625e-06,
+      "tolerance": "rtol=2e-6, atol=1e-5 (float32 Sinkhorn rounding)"
+    },
+    {
+      "check": "Table7 PRIME seed33",
+      "n_rows": 1,
+      "numeric_columns": 1,
+      "maximum_absolute_difference": 1.1920928955078125e-07,
+      "tolerance": "rtol=2e-6, atol=1e-5 (float32 Sinkhorn rounding)"
+    },
+    {
+      "check": "Table7 DIM+MSE seed33",
+      "n_rows": 1,
+      "numeric_columns": 1,
+      "maximum_absolute_difference": 0.0,
+      "tolerance": "rtol=2e-6, atol=1e-5 (float32 Sinkhorn rounding)"
+    },
+    {
+      "check": "Table7 PRIME-only seed33",
+      "n_rows": 1,
+      "numeric_columns": 1,
+      "maximum_absolute_difference": 0.0,
+      "tolerance": "rtol=2e-6, atol=1e-5 (float32 Sinkhorn rounding)"
+    },
+    {
+      "check": "Table14 loss terms",
+      "n_rows": 6,
+      "numeric_columns": 12,
+      "maximum_absolute_difference": 0.0,
+      "tolerance": "rtol=2e-6, atol=1e-5 (float32 Sinkhorn rounding)"
+    },
+    {
+      "check": "Table15 graph specificity seed33",
+      "n_rows": 4,
+      "numeric_columns": 2,
+      "maximum_absolute_difference": 2.384185786574733e-07,
+      "tolerance": "rtol=2e-6, atol=1e-5 (float32 Sinkhorn rounding)"
+    },
+    {
+      "check": "Table16 all20 checkpoints at start0",
+      "n_rows": 20,
+      "numeric_columns": 15,
+      "maximum_absolute_difference": 0.0,
+      "tolerance": "rtol=2e-6, atol=1e-5 (float32 Sinkhorn rounding)"
+    },
+    {
+      "check": "Table17 full30start clock evaluation",
+      "n_rows": 4,
+      "numeric_columns": 28,
+      "maximum_absolute_difference": 0.0,
+      "tolerance": "rtol=2e-6, atol=1e-5 (float32 Sinkhorn rounding)"
+    },
+    {
+      "check": "Table18 minimal seed33 extractor",
+      "n_rows": 5,
+      "numeric_columns": 4,
+      "maximum_absolute_difference": 0.0,
+      "tolerance": "rtol=2e-6, atol=1e-5 (float32 Sinkhorn rounding)"
+    }
+  ],
+  "training_smoke_checks": [
+    {
+      "task": "fixed_lag_train",
+      "returncode": 0,
+      "seconds": 5.04132806099733
+    },
+    {
+      "task": "sequential_lag_train",
+      "returncode": 0,
+      "seconds": 4.742122880001261
+    },
+    {
+      "task": "prime_only_train",
+      "returncode": 0,
+      "seconds": 5.191631800000323
+    },
+    {
+      "task": "graph_specificity_train",
+      "returncode": 0,
+      "seconds": 8.339356112999667
+    }
+  ],
+  "syntax_check": "all ablation Python files compiled",
+  "help_check": "8 representative notebook/standalone task parsers passed",
+  "full_training_run": false,
+  "full_parameter_sweep_training": false
+}

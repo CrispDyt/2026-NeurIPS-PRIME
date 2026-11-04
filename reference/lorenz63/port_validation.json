@@ -1,0 +1,38 @@
+{
+  "metric_functions_unchanged": 38,
+  "MSE_two_step_source_parity": {
+    "bitwise_equal_weights": true,
+    "best_loss": 0.08136335015296936
+  },
+  "DIM_two_step_source_parity": {
+    "bitwise_equal_weights": true,
+    "best_loss": 0.03389817476272583
+  },
+  "DIM+MSE_two_step_source_parity": {
+    "bitwise_equal_weights": true,
+    "best_loss": 0.031550101935863495
+  },
+  "reference_reaggregation": {
+    "prediction_rows": 640,
+    "poincare_rows": 20,
+    "all_summary_metrics_match": true
+  },
+  "prime_seed33_recurrence_geometry_matches_archive": true,
+  "cuda_prime_seed33_start0_historical_replay": {
+    "prediction_horizon": 500,
+    "poincare_horizon": 999,
+    "absolute_differences_prediction": {
+      "NMSE_20": 0.0,
+      "NMSE_100": 0.0,
+      "NMSE_400": 0.0,
+      "Attractor_W2": 0.0,
+      "PSD_logL1": 0.0,
+      "TCM": 0.0
+    },
+    "absolute_differences_drtd": {
+      "tauW1_x10": 0.0,
+      "tauW1_z40": 0.0,
+      "tauW1_unimodal": 0.0
+    }
+  }
+}

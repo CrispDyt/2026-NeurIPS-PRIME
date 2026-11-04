@@ -1,0 +1,2589 @@
+#!/usr/bin/env python3
+"""
+Lorenz63 PRIME loss-term ablation runner.
+
+Ablation 3: Which terms in the PRIME recurrence-block loss matter?
+
+Default variants:
+  dim_only             : DIM pretraining only; also used as the shared initialization.
+  full                 : full PRIME loss = graph + source marginal + target marginal.
+  graph_only           : return-graph term only; removes both marginal stabilizers.
+  marginals_only       : source + target marginal terms only; removes return-graph term.
+  no_source_marginal   : graph + target marginal; removes source marginal.
+  no_target_marginal   : graph + source marginal; removes target marginal.
+
+Optional aliases / extra modes:
+  no_marginals         : same as graph_only.
+  no_graph             : same as marginals_only.
+  source_only          : source marginal only.
+  target_only          : target marginal only.
+
+Run all variants in fresh subprocesses:
+  python lorenz_prime_loss_term_ablation.py --all --train_path train_data.npy
+
+Run one variant:
+  python lorenz_prime_loss_term_ablation.py --mode full --train_path train_data.npy \
+      --init_checkpoint /path/to/shared_dim_selected.p
+
+Recommended for loss-term ablation:
+  --all first trains a shared DIM checkpoint for --warm_steps, then starts every
+  PRIME loss-term variant from that same DIM checkpoint and runs --refine_steps
+  updates using the same implicit recurrence section. This isolates the effect
+  of the loss terms rather than the section or initialization.
+
+Data format:
+  train_data must be a 2D array (T, d). Supported: .npy, .npz, .pkl/.pickle/.p, .pt/.pth
+"""
+
+import argparse
+import datetime
+import hashlib
+import io
+import json
+import os
+import pickle
+import random
+import struct
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+import torch.nn as tnn
+from geomloss import SamplesLoss
+from sklearn.preprocessing import MaxAbsScaler
+from torch import optim
+
+from rebuttal_mechanism_utils import (
+    MECHANISM_LOSS_MODES,
+    MECHANISM_SCHEDULE_MODES,
+    MechanismScheduleSampler,
+    loss_term_weights as mechanism_loss_term_weights,
+    schedule_properties,
+)
+
+
+# =========================================================
+# Loading utilities
+# =========================================================
+def extract_array_from_object(obj):
+    if isinstance(obj, np.ndarray):
+        return obj
+    if torch.is_tensor(obj):
+        return obj.detach().cpu().numpy()
+    if isinstance(obj, dict):
+        for key in ["train_data", "train", "training", "data", "X", "Y"]:
+            if key in obj:
+                val = obj[key]
+                return val.detach().cpu().numpy() if torch.is_tensor(val) else val
+        raise KeyError(f"Could not infer train array key. Available keys: {list(obj.keys())}")
+    if isinstance(obj, (list, tuple)):
+        for item in obj:
+            if torch.is_tensor(item):
+                arr = item.detach().cpu().numpy()
+            else:
+                try:
+                    arr = np.asarray(item)
+                except Exception:
+                    continue
+            if arr.ndim == 2:
+                return arr
+    raise TypeError(f"Could not extract a 2D train array from object of type {type(obj)}")
+
+
+def load_train_array(path: str) -> np.ndarray:
+    if not path:
+        raise ValueError("Use --train_path /path/to/train_data.npy or set TRAIN_DATA_PATH.")
+    p = Path(path).expanduser().resolve()
+    if not p.exists():
+        raise FileNotFoundError(f"Training data file not found: {p}")
+
+    suffix = p.suffix.lower()
+    if suffix == ".npy":
+        arr = np.load(p, allow_pickle=True)
+    elif suffix == ".npz":
+        obj = np.load(p, allow_pickle=True)
+        for key in ["train_data", "train", "training", "data", "X", "Y"]:
+            if key in obj:
+                arr = obj[key]
+                break
+        else:
+            keys = list(obj.keys())
+            if len(keys) == 1:
+                arr = obj[keys[0]]
+            else:
+                raise KeyError(f"Could not infer train array key in {p}. Available keys: {keys}")
+    elif suffix in {".pkl", ".pickle", ".p"}:
+        with open(p, "rb") as f:
+            obj = pickle.load(f)
+        arr = extract_array_from_object(obj)
+    elif suffix in {".pt", ".pth"}:
+        obj = torch.load(p, map_location="cpu", weights_only=False)
+        arr = extract_array_from_object(obj)
+    else:
+        raise ValueError(f"Unsupported training data format: {suffix}")
+
+    arr = np.asarray(arr, dtype=np.float64)
+    if arr.ndim != 2:
+        raise ValueError(f"train_data must be 2D (T, d), got shape {arr.shape}")
+    if not np.all(np.isfinite(arr)):
+        raise ValueError("train_data contains non-finite values.")
+    return arr
+
+
+class CPU_Unpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        if module == "torch.storage" and name == "_load_from_bytes":
+            return lambda b: torch.load(io.BytesIO(b), map_location="cpu", weights_only=False)
+        return super().find_class(module, name)
+
+
+def load_pickle_cpu(path):
+    with open(path, "rb") as f:
+        return CPU_Unpickler(f).load()
+
+
+def smart_load(path):
+    last_err = None
+    try:
+        return torch.load(path, map_location="cpu", weights_only=False)
+    except Exception as e:
+        last_err = e
+    try:
+        return load_pickle_cpu(path)
+    except Exception as e:
+        raise RuntimeError(
+            f"Failed to load checkpoint: {path}\n"
+            f"torch.load error: {last_err}\n"
+            f"pickle error: {e}"
+        )
+
+
+def extract_state_dict_from_ckpt(path):
+    obj = smart_load(path)
+    sd = None
+    if isinstance(obj, dict):
+        if "model" in obj and isinstance(obj["model"], dict):
+            sd = obj["model"].get("state_dict", None)
+        if sd is None and "state_dict" in obj:
+            sd = obj["state_dict"]
+        if sd is None and "model_state_dict" in obj:
+            sd = obj["model_state_dict"]
+    else:
+        sd = obj
+    if sd is None:
+        raise RuntimeError(f"Could not find state_dict in checkpoint: {path}")
+    return sd
+
+
+# =========================================================
+# General utilities
+# =========================================================
+def set_seed(seed: int):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+
+def make_sinkhorn(blur: float):
+    return SamplesLoss(loss="sinkhorn", p=2, blur=float(blur), backend="tensorized")
+
+
+WARMUP_L1_FINGERPRINT_SCHEMA = "sha256-float64le-c-v1"
+MECHANISM_PLAN_FINGERPRINT_SCHEMA = (
+    "sha256-length-prefixed-int64le-blocks-v1"
+)
+CANONICAL_RUNTIME_STATE_FINGERPRINT_SCHEMA = (
+    "prime-canonical-runtime-state-sha256-v1"
+)
+
+
+def warmup_l1_sha256(values) -> str:
+    """Canonical SHA-256 fingerprint for a one-dimensional L1 loss history.
+
+    The digest is intentionally over the raw little-endian float64 bytes only.
+    Existing legacy checkpoint histories can therefore be checked without
+    reconstructing any trainer-specific container or JSON serialization.
+    """
+
+    array = np.asarray(values, dtype="<f8")
+    if array.ndim != 1:
+        raise ValueError(
+            f"Warm-up L1 history must be one-dimensional, got {array.shape}"
+        )
+    if not np.all(np.isfinite(array)):
+        raise ValueError("Warm-up L1 history contains non-finite values")
+    return hashlib.sha256(array.tobytes(order="C")).hexdigest()
+
+
+def normalize_expected_sha256(value: str) -> str:
+    """Validate and normalize an optional expected SHA-256 digest."""
+
+    digest = str(value or "").strip().lower()
+    if not digest:
+        return ""
+    if len(digest) != 64 or any(
+        character not in "0123456789abcdef" for character in digest
+    ):
+        raise ValueError(
+            "--expected_warmup_l1_sha256 must be exactly 64 hexadecimal characters"
+        )
+    return digest
+
+
+def canonical_runtime_state_sha256(value) -> str:
+    """Hash nested runtime state without pickle or process-local identities.
+
+    Mappings are key-sorted by their canonical byte encoding. Tensor and array
+    payloads include dtype and shape and use little-endian, C-contiguous CPU
+    bytes. The supported scalar/container types cover model state_dicts, Adam
+    state_dicts, NumPy RandomState state, and torch CPU/CUDA RNG states.
+    """
+
+    def blob(tag: bytes, payload: bytes) -> bytes:
+        return tag + struct.pack("<Q", len(payload)) + payload
+
+    def encode_array(array: np.ndarray, tag: bytes) -> bytes:
+        value_array = np.asarray(array)
+        canonical_dtype = value_array.dtype.newbyteorder("<")
+        canonical_array = np.ascontiguousarray(
+            value_array.astype(canonical_dtype, copy=False)
+        )
+        dtype_bytes = canonical_dtype.str.encode("ascii")
+        shape = np.asarray(canonical_array.shape, dtype="<i8")
+        return b"".join(
+            (
+                tag,
+                blob(b"d", dtype_bytes),
+                blob(b"s", shape.tobytes(order="C")),
+                blob(b"v", canonical_array.tobytes(order="C")),
+            )
+        )
+
+    def encode(item) -> bytes:
+        if item is None:
+            return b"N"
+        if isinstance(item, (np.bool_, bool)):
+            return b"B1" if bool(item) else b"B0"
+        if isinstance(item, np.generic):
+            return encode(item.item())
+        if isinstance(item, int):
+            return blob(b"I", str(item).encode("ascii"))
+        if isinstance(item, float):
+            return b"F" + struct.pack("<d", float(item))
+        if isinstance(item, str):
+            return blob(b"S", item.encode("utf-8"))
+        if isinstance(item, bytes):
+            return blob(b"Y", item)
+        if torch.is_tensor(item):
+            tensor = item.detach().cpu().contiguous()
+            return encode_array(tensor.numpy(), b"R")
+        if isinstance(item, np.ndarray):
+            return encode_array(item, b"A")
+        if isinstance(item, dict):
+            encoded_pairs = [
+                (encode(key), encode(mapped_value))
+                for key, mapped_value in item.items()
+            ]
+            encoded_pairs.sort(key=lambda pair: pair[0])
+            payload = b"".join(
+                blob(b"k", key_bytes) + blob(b"v", value_bytes)
+                for key_bytes, value_bytes in encoded_pairs
+            )
+            return b"D" + struct.pack("<Q", len(encoded_pairs)) + payload
+        if isinstance(item, tuple):
+            return (
+                b"T"
+                + struct.pack("<Q", len(item))
+                + b"".join(blob(b"e", encode(element)) for element in item)
+            )
+        if isinstance(item, list):
+            return (
+                b"L"
+                + struct.pack("<Q", len(item))
+                + b"".join(blob(b"e", encode(element)) for element in item)
+            )
+        raise TypeError(
+            "Unsupported canonical runtime-state type: "
+            f"{type(item).__module__}.{type(item).__qualname__}"
+        )
+
+    hasher = hashlib.sha256()
+    hasher.update(
+        CANONICAL_RUNTIME_STATE_FINGERPRINT_SCHEMA.encode("ascii") + b"\0"
+    )
+    hasher.update(encode(value))
+    return hasher.hexdigest()
+
+
+LOSS_TERM_MODES = {
+    "dim_only",
+    "full",
+    "graph_only",
+    "no_marginals",
+    "marginals_only",
+    "no_graph",
+    "no_source_marginal",
+    "no_target_marginal",
+    "source_only",
+    "target_only",
+}
+
+
+def loss_term_weights_for_mode(mode: str, w_marg_u0: float, w_marg_u1: float, w_defect: float):
+    """
+    Return weights for the four pieces of the recurrence-block objective:
+      graph term, source marginal, target marginal, and optional defect.
+
+    The full PRIME objective is
+      graph + w_marg_u0 * source_marginal + w_marg_u1 * target_marginal
+      + w_defect * defect.
+
+    For ablation variants, we zero out selected terms while keeping the same
+    Sinkhorn blur, recurrence section, block length, optimizer, and DIM warm start.
+    """
+    if mode == "dim_only":
+        return 0.0, 0.0, 0.0, 0.0
+    if mode == "full":
+        return 1.0, float(w_marg_u0), float(w_marg_u1), float(w_defect)
+    if mode in {"graph_only", "no_marginals"}:
+        return 1.0, 0.0, 0.0, float(w_defect)
+    if mode in {"marginals_only", "no_graph"}:
+        return 0.0, float(w_marg_u0), float(w_marg_u1), float(w_defect)
+    if mode == "no_source_marginal":
+        return 1.0, 0.0, float(w_marg_u1), float(w_defect)
+    if mode == "no_target_marginal":
+        return 1.0, float(w_marg_u0), 0.0, float(w_defect)
+    if mode == "source_only":
+        return 0.0, float(w_marg_u0), 0.0, float(w_defect)
+    if mode == "target_only":
+        return 0.0, 0.0, float(w_marg_u1), float(w_defect)
+    raise ValueError(f"Unknown loss-term mode: {mode}")
+
+def describe_loss_terms(mode: str, graph_w: float, marg0_w: float, marg1_w: float, defect_w: float) -> str:
+    return (
+        f"mode={mode} | weights: "
+        f"graph={graph_w:g}, source_marg={marg0_w:g}, "
+        f"target_marg={marg1_w:g}, defect={defect_w:g}"
+    )
+
+
+def build_net(d: int, width: int = 100):
+    return tnn.Sequential(
+        tnn.Linear(d, width), tnn.Tanh(),
+        tnn.Linear(width, width), tnn.Tanh(),
+        tnn.Linear(width, width), tnn.Tanh(),
+        tnn.Linear(width, d),
+    )
+
+def cpu_state_dict(net):
+    return {k: v.detach().cpu().clone() for k, v in net.state_dict().items()}
+
+def build_delay_full_onech(y_scaled, tau, dim, ch):
+    """
+    y_scaled: (T, d)
+    returns D_full: (T, dim), with lag blocks
+      [y_ch(t), y_ch(t-tau), ..., y_ch(t-(dim-1)tau)]
+    """
+    T, _ = y_scaled.shape
+    min_t = (dim - 1) * tau
+    D = np.zeros((T, dim), dtype=np.float64)
+    s = y_scaled[:, ch]
+    for t in range(min_t, T):
+        D[t] = np.array([s[t - i * tau] for i in range(dim)], dtype=np.float64)
+    return D, min_t
+
+
+def farthest_point_sampling(X, M, start=0):
+    N = int(X.shape[0])
+    M = int(min(int(M), N))
+    idx = np.zeros((M,), dtype=np.int64)
+    idx[0] = int(start)
+    dist2 = np.sum((X - X[idx[0]]) ** 2, axis=1)
+    for m in range(1, M):
+        j = int(np.argmax(dist2))
+        idx[m] = j
+        d2_new = np.sum((X - X[j]) ** 2, axis=1)
+        dist2 = np.minimum(dist2, d2_new)
+    return idx
+
+
+def extract_hits_from_landmarks(U_dw, C_dw, eps_in, eps_out, L_sec):
+    """Hysteresis + min-gap hit extraction."""
+    T = int(U_dw.shape[0])
+    hits = []
+    visit_lens = []
+    last = -10**12
+    active = False
+    active_i = -1
+    enter_t = -1
+
+    for t in range(T):
+        d2 = np.sum((C_dw - U_dw[t]) ** 2, axis=1)
+        i = int(np.argmin(d2))
+        d = float(np.sqrt(d2[i]))
+
+        if not active:
+            if d <= eps_in and (t - last) >= int(L_sec):
+                hits.append(t)
+                last = t
+                active = True
+                active_i = i
+                enter_t = t
+        else:
+            d_active = float(np.sqrt(np.sum((U_dw[t] - C_dw[active_i]) ** 2)))
+            if d_active >= eps_out:
+                active = False
+                active_i = -1
+                if enter_t >= 0:
+                    visit_lens.append(t - enter_t)
+                enter_t = -1
+
+    return np.array(hits, dtype=np.int64), np.array(visit_lens, dtype=np.int64)
+
+
+def extract_exact_level_hits_raw(train_raw, ch, level, direction, min_t, L_sec):
+    """
+    Integer hit indices from raw-coordinate level crossings.
+    direction=+1: upward crossing. direction=-1: downward crossing. direction=0: any crossing.
+    Hit index is i+1, the first sample after crossing.
+    """
+    x = np.asarray(train_raw[:, ch], dtype=np.float64)
+    a = x[:-1] - float(level)
+    b = x[1:] - float(level)
+
+    if direction > 0:
+        mask = (a < 0) & (b >= 0)
+    elif direction < 0:
+        mask = (a > 0) & (b <= 0)
+    else:
+        mask = (a == 0) | (a * b < 0)
+
+    idx = np.where(mask)[0] + 1
+    hits = []
+    last = -10**12
+    for t in idx:
+        t = int(t)
+        if t < min_t:
+            continue
+        if t - last >= int(L_sec):
+            hits.append(t)
+            last = t
+    return np.asarray(hits, dtype=np.int64)
+
+
+def sample_random_hits(T, min_t, n_hits, L_sec, seed):
+    """
+    Random negative-control recurrence times with roughly the same number of hits.
+    Uses greedy min-gap filtering over a random permutation.
+    """
+    rng = np.random.default_rng(seed)
+    candidates = np.arange(min_t, T, dtype=np.int64)
+    if len(candidates) == 0:
+        return np.asarray([], dtype=np.int64)
+
+    for _ in range(200):
+        perm = rng.permutation(candidates)
+        selected = []
+        for t in perm:
+            if all(abs(int(t) - int(s)) >= int(L_sec) for s in selected):
+                selected.append(int(t))
+                if len(selected) >= n_hits:
+                    break
+        if len(selected) >= max(4, min(n_hits, len(candidates))):
+            return np.asarray(sorted(selected[:n_hits]), dtype=np.int64)
+
+    # Fallback: evenly spaced random-ish grid with jitter.
+    n = min(n_hits, max(1, len(candidates) // max(1, L_sec)))
+    base = np.linspace(min_t, T - 1, n, dtype=np.int64)
+    jitter = rng.integers(-max(1, L_sec // 2), max(2, L_sec // 2 + 1), size=n)
+    hits = np.clip(base + jitter, min_t, T - 1)
+    hits = np.unique(np.sort(hits)).astype(np.int64)
+    return hits
+
+
+def build_delay_data_tensor_onech(y_np, dim_delay, tau_delay, ch, device):
+    """One-channel delay tensor: (1, L, dim_delay)."""
+    Y = torch.tensor(y_np, dtype=torch.float32, device=device)
+    s = Y[:, ch]
+    T = s.shape[0]
+    L = T - tau_delay * (dim_delay - 1)
+    delayed = torch.zeros((1, L, dim_delay), dtype=torch.float32, device=device)
+    for i in range(dim_delay):
+        start = dim_delay * tau_delay - (i + 1) * tau_delay
+        delayed[0, :, i] = s[start:start + L]
+    return delayed
+
+
+def plot_history(path, values, labels, title):
+    plt.figure(figsize=(10, 3), dpi=140)
+    for v, lab in zip(values, labels):
+        plt.plot(v, label=lab)
+    plt.legend()
+    plt.title(title)
+    plt.tight_layout()
+    plt.savefig(path, dpi=160)
+    plt.close()
+
+
+def latest_file(patterns):
+    files = []
+    for p in patterns:
+        files.extend(Path().glob(p) if not os.path.isabs(p) else [])
+    # Path().glob does not handle normal relative string with directories well when p has './'.
+    # Use glob module robustly below.
+    import glob
+    files = []
+    for p in patterns:
+        files.extend(glob.glob(p))
+    files = sorted(files, key=os.path.getmtime)
+    return files[-1] if files else None
+
+
+def find_selected_checkpoint(folder):
+    folder = str(folder)
+    ckpt = latest_file([os.path.join(folder, "*_SELECTED_*.p")])
+    if ckpt is not None:
+        return ckpt
+    ckpt = latest_file([os.path.join(folder, "*_BEST_*.p")])
+    if ckpt is not None:
+        return ckpt
+    ckpt = latest_file([os.path.join(folder, "*_FINAL_*.p")])
+    if ckpt is not None:
+        return ckpt
+    raise FileNotFoundError(f"No checkpoint found in {folder}")
+
+
+# =========================================================
+# Main training routine for one mode
+# =========================================================
+def train_one(args):
+    dt_obs = args.dt_obs
+    dt_base = args.dt_base
+    sub = int(round(dt_obs / dt_base))
+    if sub < 1:
+        raise ValueError(f"sub={sub} < 1; check dt_obs={dt_obs}, dt_base={dt_base}")
+
+    seed = args.seed
+    mode = args.mode
+    allowed_modes = LOSS_TERM_MODES
+    if mode not in allowed_modes:
+        raise ValueError(f"Unknown mode={mode}. Allowed: {sorted(allowed_modes)}")
+    mechanism_enabled = bool(args.rebuttal_mechanism_ablation)
+    continuous_legacy_replay = bool(
+        getattr(args, "continuous_legacy_replay", False)
+    )
+    if continuous_legacy_replay and not mechanism_enabled:
+        raise ValueError(
+            "--continuous_legacy_replay is only valid together with "
+            "--rebuttal_mechanism_ablation"
+        )
+    if mechanism_enabled:
+        if mode != "full":
+            raise ValueError(
+                "Opt-in mechanism Stage-2 runs must use --mode full; "
+                "use --mechanism_loss to select the loss ablation."
+            )
+        if not args.init_checkpoint and not continuous_legacy_replay:
+            raise ValueError(
+                "--rebuttal_mechanism_ablation requires --init_checkpoint so "
+                "every variant starts from the shared DIM checkpoint, unless "
+                "--continuous_legacy_replay is explicitly enabled."
+            )
+        if continuous_legacy_replay and args.init_checkpoint:
+            raise ValueError(
+                "--continuous_legacy_replay must start from random initialization "
+                "and cannot be combined with --init_checkpoint"
+            )
+        if args.mechanism_schedule not in MECHANISM_SCHEDULE_MODES:
+            raise ValueError(args.mechanism_schedule)
+        if args.mechanism_loss not in MECHANISM_LOSS_MODES:
+            raise ValueError(args.mechanism_loss)
+        if args.mechanism_loss == "dim_only":
+            raise ValueError(
+                "The shared DIM checkpoint is evaluated directly; do not run "
+                "a Stage-2 subprocess with --mechanism_loss dim_only."
+            )
+        if not args.mechanism_variant_name:
+            raise ValueError("--mechanism_variant_name must be non-empty")
+        if any(
+            character not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-"
+            for character in args.mechanism_variant_name
+        ):
+            raise ValueError(
+                "--mechanism_variant_name may contain only letters, digits, _, ., and -"
+            )
+
+    cand_frac = args.cand_frac
+    q_speed = args.q_speed
+    M_landmarks = args.M_landmarks
+    L_sec = args.L_sec
+    tau_delay = args.tau_delay
+    dim_delay = args.dim_delay
+    eps_in_mult = args.eps_in_mult
+    eps_out_mult = args.eps_out_mult
+    DELAY_CH = args.delay_ch
+
+    # If initialized from a shared DIM checkpoint, skip warmup and use refine_steps.
+    if args.init_checkpoint:
+        Nsteps = int(args.refine_steps)
+        warm_steps = 0
+    else:
+        Nsteps = int(args.Nsteps)
+        warm_steps = int(args.warm_steps)
+    if continuous_legacy_replay and not (0 < warm_steps < Nsteps):
+        raise ValueError(
+            "--continuous_legacy_replay requires 0 < warm_steps < Nsteps; "
+            f"received warm_steps={warm_steps}, Nsteps={Nsteps}"
+        )
+
+    requested_global_schedule_steps = int(
+        getattr(args, "global_schedule_total_steps", 0)
+    )
+    if requested_global_schedule_steps < 0:
+        raise ValueError("--global_schedule_total_steps must be non-negative")
+    if requested_global_schedule_steps and not continuous_legacy_replay:
+        raise ValueError(
+            "--global_schedule_total_steps is only supported by "
+            "--continuous_legacy_replay"
+        )
+    global_schedule_total_steps = (
+        requested_global_schedule_steps
+        if requested_global_schedule_steps > 0
+        else Nsteps
+    )
+    if global_schedule_total_steps < Nsteps:
+        raise ValueError(
+            "--global_schedule_total_steps must be at least Nsteps; "
+            f"received {global_schedule_total_steps} < {Nsteps}"
+        )
+
+    expected_warmup_l1_sha256 = normalize_expected_sha256(
+        getattr(args, "expected_warmup_l1_sha256", "")
+    )
+    if expected_warmup_l1_sha256 and not continuous_legacy_replay:
+        raise ValueError(
+            "--expected_warmup_l1_sha256 requires --continuous_legacy_replay"
+        )
+    if continuous_legacy_replay and not expected_warmup_l1_sha256:
+        raise ValueError(
+            "--continuous_legacy_replay requires a non-empty "
+            "--expected_warmup_l1_sha256 so the legacy warm-up is verified "
+            "before Stage 2"
+        )
+
+    reference_checkpoint_iter = int(
+        getattr(args, "reference_checkpoint_iter", -1)
+    )
+    if reference_checkpoint_iter < -1:
+        raise ValueError("--reference_checkpoint_iter must be -1 or non-negative")
+    if reference_checkpoint_iter >= 0 and not continuous_legacy_replay:
+        raise ValueError(
+            "--reference_checkpoint_iter requires --continuous_legacy_replay"
+        )
+    if (
+        reference_checkpoint_iter >= 0
+        and reference_checkpoint_iter < warm_steps
+    ):
+        raise ValueError(
+            "--reference_checkpoint_iter must identify a Stage-2 global "
+            f"iteration (>= warm_steps={warm_steps})"
+        )
+    if reference_checkpoint_iter >= global_schedule_total_steps:
+        raise ValueError(
+            "--reference_checkpoint_iter lies outside the declared global "
+            f"schedule: {reference_checkpoint_iter} >= "
+            f"{global_schedule_total_steps}"
+        )
+    if reference_checkpoint_iter >= 0:
+        reference_stage2_steps = int(args.stage2_steps_per_cycle)
+        reference_stage1_steps = int(args.stage1_steps_per_cycle)
+        reference_cycle_steps = (
+            reference_stage2_steps + reference_stage1_steps
+        )
+        if reference_stage2_steps <= 0 or reference_cycle_steps <= 0:
+            raise ValueError(
+                "--reference_checkpoint_iter requires a training cycle with "
+                "at least one Stage-2 update"
+            )
+        reference_cycle_offset = (
+            reference_checkpoint_iter - warm_steps
+        ) % reference_cycle_steps
+        if reference_cycle_offset >= reference_stage2_steps:
+            raise ValueError(
+                "--reference_checkpoint_iter must be a Stage-2 iteration "
+                "under the configured cycle; "
+                f"iter={reference_checkpoint_iter}, warm_steps={warm_steps}, "
+                f"stage2_steps_per_cycle={reference_stage2_steps}, "
+                f"stage1_steps_per_cycle={reference_stage1_steps}"
+            )
+
+    tau_pair = args.tau_pair
+    stage1_batch = args.stage1_batch
+    lr1 = args.lr1
+    L_hits_fullbatch = args.L_hits_fullbatch
+    BATCH_SIZE_STAGE2 = args.BATCH_SIZE_STAGE2
+    lr2 = args.lr2
+    alpha_pair_state = args.alpha_pair_state
+    alpha_pair_delay = args.alpha_pair_delay
+    w_marg_u0 = args.w_marg_u0
+    w_marg_u1 = args.w_marg_u1
+    w_defect = args.w_defect
+    if mechanism_enabled:
+        graph_weight, marg0_weight, marg1_weight, defect_weight = (
+            mechanism_loss_term_weights(
+                args.mechanism_loss,
+                marginal_source_weight=w_marg_u0,
+                marginal_target_weight=w_marg_u1,
+                defect_weight=w_defect,
+            )
+        )
+        loss_term_description = describe_loss_terms(
+            args.mechanism_loss,
+            graph_weight,
+            marg0_weight,
+            marg1_weight,
+            defect_weight,
+        )
+    else:
+        graph_weight, marg0_weight, marg1_weight, defect_weight = loss_term_weights_for_mode(
+            mode, w_marg_u0=w_marg_u0, w_marg_u1=w_marg_u1, w_defect=w_defect
+        )
+        loss_term_description = describe_loss_terms(mode, graph_weight, marg0_weight, marg1_weight, defect_weight)
+    blur_start = args.blur_start
+    blur_end = args.blur_end
+    stage2_steps_per_cycle = args.stage2_steps_per_cycle
+    stage1_steps_per_cycle = args.stage1_steps_per_cycle
+    w2_const = args.w2_const
+
+    if mode == "dim_only":
+        warm_steps = Nsteps
+        stage2_steps_per_cycle = 0
+        stage1_steps_per_cycle = 1
+
+    device = "cuda" if torch.cuda.is_available() and not args.cpu else "cpu"
+    set_seed(seed)
+
+    output_mode = args.mechanism_variant_name if mechanism_enabled else mode
+    out_dir = Path(args.run_root) / f"{output_mode}_seed{seed}"
+    if args.fail_if_out_dir_exists and out_dir.exists():
+        raise FileExistsError(f"Refusing to reuse existing output directory: {out_dir}")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    save_prefix = (
+        f"Mechanism_{output_mode}_seed{seed}"
+        if mechanism_enabled
+        else f"LossTerm_{mode}_seed{seed}"
+    )
+
+    print("device:", device)
+    print("OUT_DIR:", out_dir)
+    print("mode:", mode)
+    if mechanism_enabled:
+        print("mechanism_variant:", output_mode)
+        print("mechanism_schedule:", args.mechanism_schedule)
+        print("mechanism_loss:", args.mechanism_loss)
+    print("loss_terms:", loss_term_description)
+    print("init_checkpoint:", args.init_checkpoint if args.init_checkpoint else "None")
+    if continuous_legacy_replay:
+        print("continuous_legacy_replay: True")
+        print("global_schedule_total_steps:", global_schedule_total_steps)
+        print(
+            "expected_warmup_l1_sha256:",
+            expected_warmup_l1_sha256 or "not_provided",
+        )
+        print(
+            "reference_checkpoint_iter:",
+            (
+                reference_checkpoint_iter
+                if reference_checkpoint_iter >= 0
+                else "disabled"
+            ),
+        )
+
+    train = load_train_array(args.train_path)
+    T, d = train.shape
+    if DELAY_CH < 0 or DELAY_CH >= d:
+        raise ValueError(f"delay_ch={DELAY_CH} out of range for d={d}")
+
+    scaler = MaxAbsScaler().fit(train)
+    y_scaled = scaler.transform(train).astype(np.float64)
+
+    # Delay and augmented coordinates used for implicit section and PRIME atoms.
+    D_full, min_t = build_delay_full_onech(y_scaled, tau=tau_delay, dim=dim_delay, ch=DELAY_CH)
+    U_full = np.concatenate([y_scaled, D_full], axis=1)
+    T_eff = T - min_t
+    if T_eff <= 10:
+        raise ValueError(f"Too few effective samples: T={T}, min_t={min_t}")
+
+    # Build implicit hits no matter what; random_hits uses its hit count, and dim_only stores stats.
+    speed = np.linalg.norm(y_scaled[1:] - y_scaled[:-1], axis=1)
+    speed = np.concatenate([[speed[0]], speed], axis=0)
+    idx_eff = np.arange(min_t, T)
+    thr = np.quantile(speed[idx_eff], q_speed)
+    pool = idx_eff[speed[idx_eff] >= thr]
+    cand_target = max(1, int(round(cand_frac * T_eff)))
+    if len(pool) >= cand_target:
+        idx_cand = np.random.choice(pool, size=cand_target, replace=False)
+    else:
+        idx_cand = pool.copy()
+    idx_cand = np.sort(idx_cand)
+    if len(idx_cand) < 2:
+        raise RuntimeError("Too few candidate points for landmark construction.")
+
+    Ucand = U_full[idx_cand]
+    u_mean_c = Ucand.mean(axis=0)
+    u_std_c = Ucand.std(axis=0) + 1e-6
+    Ucand_dw = (Ucand - u_mean_c[None, :]) / u_std_c[None, :]
+    Ufull_dw = (U_full - u_mean_c[None, :]) / u_std_c[None, :]
+
+    start0 = int(np.random.randint(0, len(idx_cand)))
+    fps_idx_local = farthest_point_sampling(Ucand_dw, M=M_landmarks, start=start0)
+    C_dw = Ucand_dw[fps_idx_local]
+
+    nn = []
+    for i in range(len(C_dw)):
+        d2 = np.sum((C_dw - C_dw[i]) ** 2, axis=1)
+        d2[i] = np.inf
+        nn.append(np.sqrt(np.min(d2)))
+    nn_med = float(np.median(nn))
+    eps_in = eps_in_mult * nn_med
+    eps_out = eps_out_mult * eps_in
+
+    implicit_hits_raw, implicit_visit_lens = extract_hits_from_landmarks(
+        Ufull_dw, C_dw, eps_in, eps_out, L_sec=L_sec
+    )
+    implicit_hits = np.sort(implicit_hits_raw[implicit_hits_raw >= min_t])
+
+    # Choose exact section defaults based on data dimension.
+    # Partial Lorenz [X,Z] => Z is channel 1. Full Lorenz [X,Y,Z] => Z is channel 2.
+    z_ch_default = 1 if d == 2 else 2
+    exact_z_ch = args.exact_z_ch if args.exact_z_ch is not None else z_ch_default
+    if exact_z_ch >= d:
+        raise ValueError(f"exact_z_ch={exact_z_ch} out of range for train_data dimension d={d}")
+
+    exact_z40_hits = extract_exact_level_hits_raw(
+        train, ch=exact_z_ch, level=args.exact_z_level,
+        direction=args.exact_direction, min_t=min_t, L_sec=L_sec
+    )
+    exact_xm10_hits = extract_exact_level_hits_raw(
+        train, ch=0, level=-10.0, direction=args.exact_direction, min_t=min_t, L_sec=L_sec
+    )
+    exact_x0_hits = extract_exact_level_hits_raw(
+        train, ch=0, level=0.0, direction=args.exact_direction, min_t=min_t, L_sec=L_sec
+    )
+
+    # Loss-term ablation holds the recurrence section fixed.
+    # Every PRIME variant uses the same implicit landmark-induced recurrence section;
+    # only the terms inside the recurrence-block objective are changed.
+    hits = implicit_hits
+    visit_lens = implicit_visit_lens
+    section_description = "implicit_landmark_recurrence_section"
+
+    hits = np.sort(np.asarray(hits, dtype=np.int64))
+    hits = hits[(hits >= min_t) & (hits < T)]
+    if len(hits) < 4 and mode != "dim_only":
+        raise RuntimeError(f"Too few hits for mode={mode}: {len(hits)}")
+
+    # Training code uses at most L_hits_fullbatch.
+    if len(hits) < L_hits_fullbatch and mode != "dim_only":
+        print(f"[WARN] N_hits={len(hits)} < L_hits_fullbatch={L_hits_fullbatch}; using smaller blocks.")
+
+    taus = np.diff(hits).astype(np.int64) if len(hits) >= 2 else np.array([], dtype=np.int64)
+    if mode != "dim_only":
+        assert len(taus) == len(hits) - 1
+        assert np.all(taus > 0)
+
+    mechanism_sampler = None
+    mechanism_properties = None
+    mechanism_source_plan_hasher = None
+    mechanism_horizon_plan_hasher = None
+    mechanism_horizon_multiset_plan_hasher = None
+    mechanism_reference_plan_hasher = None
+    mechanism_reference_horizon_multiset_plan_hasher = None
+    if mechanism_enabled:
+        mechanism_sampler = MechanismScheduleSampler(
+            recurrence_hits=hits,
+            T=T,
+            min_t=min_t,
+            minimum_gap=L_sec,
+            seed=int(seed) + int(args.mechanism_seed_offset),
+        )
+        mechanism_properties = schedule_properties(args.mechanism_schedule)
+        mechanism_source_plan_hasher = hashlib.sha256()
+        mechanism_horizon_plan_hasher = hashlib.sha256()
+        mechanism_horizon_multiset_plan_hasher = hashlib.sha256()
+        mechanism_reference_plan_hasher = hashlib.sha256()
+        mechanism_reference_horizon_multiset_plan_hasher = hashlib.sha256()
+
+    print("=" * 72)
+    print(f"Loss-term ablation mode: {mode}")
+    print(f"section_description: {section_description}")
+    print(f"loss_term_description: {loss_term_description}")
+    if mechanism_enabled:
+        print(
+            "mechanism_schedule_description: "
+            f"{mechanism_properties['source_description']} | "
+            f"state_paired_K={mechanism_properties['state_paired_K']} | "
+            f"K_fixed={mechanism_sampler.fixed_median_k}"
+        )
+    print(f"N_hits={len(hits)} | implicit_N={len(implicit_hits)} | exact_z40_N={len(exact_z40_hits)}")
+    if len(taus) > 0:
+        print(
+            f"K stats: median={np.median(taus):.3f}, mean={taus.mean():.3f}, std={taus.std():.3f}, "
+            f"p10={np.quantile(taus, 0.1):.1f}, p90={np.quantile(taus, 0.9):.1f}"
+        )
+    print("=" * 72)
+
+    # Data blocks at selected hits.
+    if len(hits) > 0:
+        XU_data = y_scaled[hits]
+        DU_data = D_full[hits]
+        U_hits_data = np.concatenate([XU_data, DU_data], axis=1)
+    else:
+        # only for dim_only fallback
+        XU_data = np.zeros((1, d), dtype=np.float64)
+        DU_data = np.zeros((1, dim_delay), dtype=np.float64)
+        U_hits_data = np.concatenate([XU_data, DU_data], axis=1)
+
+    Y_all_t = torch.tensor(y_scaled, dtype=torch.float32, device=device)
+
+    u_mean = U_hits_data.mean(axis=0)
+    u_std = U_hits_data.std(axis=0) + 1e-6
+    u_mean_t = torch.tensor(u_mean, dtype=torch.float32, device=device)
+    u_std_t = torch.tensor(u_std, dtype=torch.float32, device=device)
+
+    def whiten_u(U):
+        return (U - u_mean_t[None, :]) / u_std_t[None, :]
+
+    x_mean = y_scaled.mean(axis=0)
+    x_std = y_scaled.std(axis=0) + 1e-6
+    x_mean_t = torch.tensor(x_mean, dtype=torch.float32, device=device)
+    x_std_t = torch.tensor(x_std, dtype=torch.float32, device=device)
+
+    def whiten_x(X):
+        return (X - x_mean_t[None, :]) / x_std_t[None, :]
+
+    y_delayed_data = build_delay_data_tensor_onech(y_scaled, dim_delay, tau_delay, DELAY_CH, device)
+
+    net = build_net(d, width=args.width).to(device)
+    if args.init_checkpoint:
+        init_sd = extract_state_dict_from_ckpt(args.init_checkpoint)
+        net.load_state_dict(init_sd)
+        print(f"Loaded init checkpoint: {args.init_checkpoint}")
+
+    opt1 = optim.Adam(net.parameters(), lr=lr1)
+    opt2 = optim.Adam(net.parameters(), lr=lr2)
+
+    def compute_L1(loss_sink):
+        Tmax = len(y_scaled) - tau_pair - 1
+        idx = np.random.randint(0, Tmax, size=stage1_batch)
+        x0 = torch.tensor(y_scaled[idx], dtype=torch.float32, device=device)
+        xT_d = torch.tensor(y_scaled[idx + tau_pair], dtype=torch.float32, device=device)
+
+        x = x0.clone()
+        for _ in range(int(tau_pair * sub)):
+            x = x + float(dt_base) * net(x)
+        xT_m = x
+
+        x0w = whiten_x(x0)
+        xTd = whiten_x(xT_d)
+        xTm = whiten_x(xT_m)
+        pair_d_state = torch.cat([x0w, xTd], dim=1)
+        pair_m_state = torch.cat([x0w, xTm], dim=1)
+        L_state = loss_sink(pair_m_state, pair_d_state)
+
+        Kfine = tau_delay * dim_delay * sub
+        yy = Y_all_t.clone()
+        sols = []
+        for _ in range(Kfine):
+            sols.append(yy)
+            for _ in range(sub):
+                yy = yy + float(dt_base) * net(yy)
+        sol = torch.stack(sols, dim=0)
+        sol = sol[:, min_t:, :]
+
+        step_fine = tau_delay * sub
+        sol_ch = sol[:, :, DELAY_CH].permute(1, 0).contiguous()
+        DIM_model = torch.flip(sol_ch[:, ::step_fine], dims=[1]).unsqueeze(0).contiguous()
+        y_delay = y_delayed_data
+        L_delay = loss_sink(DIM_model, y_delay).sum()
+        glue_defect = torch.mean((DIM_model[:, 0, :-1] - y_delay[:, 0, :-1]) ** 2)
+        return L_state + L_delay + glue_defect
+
+    def compose_induced_losses(Um, Ud, L_hits, loss_sink):
+        """Apply the unchanged PRIME graph/marginal objective to atom blocks."""
+
+        xm, dm = Um[:, :d], Um[:, d:]
+        xd, dd = Ud[:, :d], Ud[:, d:]
+
+        u_m = torch.cat([alpha_pair_state * xm, alpha_pair_delay * dm], dim=1)
+        u_d = torch.cat([alpha_pair_state * xd, alpha_pair_delay * dd], dim=1)
+
+        u0_m, u1_m = u_m[:-1], u_m[1:]
+        u0_d, u1_d = u_d[:-1], u_d[1:]
+        pair_m = torch.cat([u0_m, u1_m], dim=1)
+        pair_d = torch.cat([u0_d, u1_d], dim=1)
+
+        L2_graph = loss_sink(pair_m, pair_d)
+        L2_marg0 = loss_sink(u0_m, u0_d)
+        L2_marg1 = loss_sink(u1_m, u1_d)
+        defect = torch.mean((Um[:, :d] - Ud[:, :d]) ** 2)
+        L2_raw = (
+            float(graph_weight) * L2_graph
+            + float(marg0_weight) * L2_marg0
+            + float(marg1_weight) * L2_marg1
+            + float(defect_weight) * defect
+        )
+        # Preserve the current PRIME normalization exactly: divide by L_hits,
+        # although the graph contains L_hits - 1 transition pairs.
+        L2_norm = L2_raw / float(L_hits)
+        return L2_norm, L2_raw, L2_graph, L2_marg0, L2_marg1, defect
+
+    def build_induced_block(k0, L_hits, loss_sink, return_stats=False):
+        """Original recurrence-correct block; unchanged when opt-in is disabled."""
+
+        hit_times = hits[k0:k0 + L_hits].astype(np.int64)
+
+        X_blk_d = torch.tensor(XU_data[k0:k0 + L_hits], dtype=torch.float32, device=device)
+        D_blk_d = torch.tensor(DU_data[k0:k0 + L_hits], dtype=torch.float32, device=device)
+
+        t0 = int(hit_times[0])
+        t_start = t0 - int((dim_delay - 1) * tau_delay)
+        if t_start < 0:
+            raise RuntimeError(f"t_start={t_start}<0")
+        t_end = int(hit_times[-1])
+        total_obs_steps = int(t_end - t_start)
+
+        x = torch.tensor(y_scaled[t_start], dtype=torch.float32, device=device)
+        hit_map = {int(t): j for j, t in enumerate(hit_times.tolist())}
+        x_hits_m = [None] * L_hits
+        x_hist = [x.clone()]
+
+        for n in range(total_obs_steps + 1):
+            t_abs = t_start + n
+            if t_abs in hit_map:
+                x_hits_m[hit_map[t_abs]] = x
+                x = x.detach()
+            if n == total_obs_steps:
+                break
+            for _ in range(sub):
+                x = x + float(dt_base) * net(x)
+            x_hist.append(x.clone())
+
+        if any(v is None for v in x_hits_m):
+            raise RuntimeError(f"Some model hits were not recorded. mode={mode}, k0={k0}")
+
+        X_blk_m = torch.stack(x_hits_m, dim=0)
+
+        Dm_list = []
+        for t_abs in hit_times:
+            idx0 = int(t_abs - t_start)
+            lag_vals = []
+            for i in range(dim_delay):
+                lag_idx = idx0 - i * tau_delay
+                if lag_idx < 0:
+                    raise RuntimeError(f"Negative lag index: {lag_idx}")
+                lag_vals.append(x_hist[lag_idx][DELAY_CH])
+            Dm_list.append(torch.stack(lag_vals, dim=0))
+        D_blk_m = torch.stack(Dm_list, dim=0)
+
+        U_blk_m = torch.cat([X_blk_m, D_blk_m], dim=1)
+        U_blk_d = torch.cat([X_blk_d, D_blk_d], dim=1)
+
+        outputs = compose_induced_losses(
+            whiten_u(U_blk_m), whiten_u(U_blk_d), L_hits, loss_sink
+        )
+        if not return_stats:
+            return outputs
+        stats = {
+            "transition_pairs": int(L_hits - 1),
+            "transition_unroll_observation_steps": int(hit_times[-1] - hit_times[0]),
+            "actual_integration_observation_steps": int(total_obs_steps),
+            "actual_integration_euler_steps": int(total_obs_steps * sub),
+            "vectorized_solver_observation_steps": int(total_obs_steps),
+        }
+        return outputs + (stats,)
+
+    def build_sequential_mechanism_block(schedule, L_hits, loss_sink):
+        """Clock/source controls that retain PRIME's continuous event chain."""
+
+        if not np.array_equal(
+            schedule.source_indices[1:], schedule.target_indices[:-1]
+        ):
+            raise ValueError(
+                f"Schedule {schedule.mode} is not a sequential event chain"
+            )
+        data_times = np.concatenate(
+            [schedule.source_indices[:1], schedule.target_indices]
+        ).astype(np.int64)
+        model_times = (
+            int(data_times[0])
+            + np.concatenate(
+                [
+                    np.array([0], dtype=np.int64),
+                    np.cumsum(schedule.model_horizons, dtype=np.int64),
+                ]
+            )
+        ).astype(np.int64)
+        if len(data_times) != L_hits or len(model_times) != L_hits:
+            raise RuntimeError("Mechanism event chain length does not match L_hits")
+
+        U_blk_d = torch.tensor(
+            U_full[data_times], dtype=torch.float32, device=device
+        )
+        history_len = int((dim_delay - 1) * tau_delay)
+        t_start = int(model_times[0]) - history_len
+        if t_start < 0:
+            raise RuntimeError(f"t_start={t_start}<0")
+        total_obs_steps = int(model_times[-1] - t_start)
+        x = torch.tensor(y_scaled[t_start], dtype=torch.float32, device=device)
+        hit_map = {int(value): index for index, value in enumerate(model_times)}
+        if len(hit_map) != L_hits:
+            raise RuntimeError("Model clock produced duplicate event times")
+        x_hits_m = [None] * L_hits
+        x_hist = [x.clone()]
+        for n in range(total_obs_steps + 1):
+            t_abs = t_start + n
+            if t_abs in hit_map:
+                x_hits_m[hit_map[t_abs]] = x
+                x = x.detach()
+            if n == total_obs_steps:
+                break
+            for _ in range(sub):
+                x = x + float(dt_base) * net(x)
+            x_hist.append(x.clone())
+        if any(value is None for value in x_hits_m):
+            raise RuntimeError("Some mechanism model events were not recorded")
+        X_blk_m = torch.stack(x_hits_m, dim=0)
+        delay_atoms = []
+        for t_abs in model_times:
+            index = int(t_abs - t_start)
+            delay_atoms.append(
+                torch.stack(
+                    [
+                        x_hist[index - i * tau_delay][DELAY_CH]
+                        for i in range(dim_delay)
+                    ],
+                    dim=0,
+                )
+            )
+        U_blk_m = torch.cat(
+            [X_blk_m, torch.stack(delay_atoms, dim=0)], dim=1
+        )
+        outputs = compose_induced_losses(
+            whiten_u(U_blk_m), whiten_u(U_blk_d), L_hits, loss_sink
+        )
+        stats = {
+            "transition_pairs": int(schedule.pair_count),
+            "transition_unroll_observation_steps": int(
+                schedule.total_unrolled_observation_steps
+            ),
+            "actual_integration_observation_steps": int(total_obs_steps),
+            "actual_integration_euler_steps": int(total_obs_steps * sub),
+            "vectorized_solver_observation_steps": int(total_obs_steps),
+        }
+        return outputs + (stats,)
+
+    def build_uniform_mechanism_block(schedule, L_hits, loss_sink):
+        """Strict per-pair uniform sources, vectorized over one transition block."""
+
+        pair_count = int(schedule.pair_count)
+        if pair_count != L_hits - 1:
+            raise RuntimeError("Uniform schedule pair count does not match L_hits")
+        source = np.asarray(schedule.source_indices, dtype=np.int64)
+        target = np.asarray(schedule.target_indices, dtype=np.int64)
+        horizons = np.asarray(schedule.model_horizons, dtype=np.int64)
+        history_len = int((dim_delay - 1) * tau_delay)
+        start = source - history_len
+        if np.any(start < 0):
+            raise RuntimeError("Uniform source lacks legal delay history")
+
+        x = torch.tensor(y_scaled[start], dtype=torch.float32, device=device)
+        x_hist = [x.clone()]
+        for _ in range(history_len):
+            for _ in range(sub):
+                x = x + float(dt_base) * net(x)
+            x_hist.append(x.clone())
+        x_source = x
+        x = x.detach()
+        max_horizon = int(np.max(horizons))
+        for _ in range(max_horizon):
+            for _ in range(sub):
+                x = x + float(dt_base) * net(x)
+            x_hist.append(x.clone())
+
+        source_delay = []
+        target_delay = []
+        x_target = []
+        for pair_index, horizon_value in enumerate(horizons):
+            horizon = int(horizon_value)
+            source_delay.append(
+                torch.stack(
+                    [
+                        x_hist[history_len - i * tau_delay][
+                            pair_index, DELAY_CH
+                        ]
+                        for i in range(dim_delay)
+                    ],
+                    dim=0,
+                )
+            )
+            target_index = history_len + horizon
+            x_target.append(x_hist[target_index][pair_index])
+            target_delay.append(
+                torch.stack(
+                    [
+                        x_hist[target_index - i * tau_delay][
+                            pair_index, DELAY_CH
+                        ]
+                        for i in range(dim_delay)
+                    ],
+                    dim=0,
+                )
+            )
+
+        U0_m = torch.cat(
+            [x_source, torch.stack(source_delay, dim=0)], dim=1
+        )
+        U1_m = torch.cat(
+            [torch.stack(x_target, dim=0), torch.stack(target_delay, dim=0)],
+            dim=1,
+        )
+        U0_d = torch.tensor(U_full[source], dtype=torch.float32, device=device)
+        U1_d = torch.tensor(U_full[target], dtype=torch.float32, device=device)
+
+        # compose_induced_losses expects a chain and forms adjacent pairs.  For
+        # strict uniform sources the pairs are independent, so compose the same
+        # graph/marginal terms directly at the requested pair grain.
+        Um0, Um1 = whiten_u(U0_m), whiten_u(U1_m)
+        Ud0, Ud1 = whiten_u(U0_d), whiten_u(U1_d)
+        um0 = torch.cat(
+            [
+                alpha_pair_state * Um0[:, :d],
+                alpha_pair_delay * Um0[:, d:],
+            ],
+            dim=1,
+        )
+        um1 = torch.cat(
+            [
+                alpha_pair_state * Um1[:, :d],
+                alpha_pair_delay * Um1[:, d:],
+            ],
+            dim=1,
+        )
+        ud0 = torch.cat(
+            [
+                alpha_pair_state * Ud0[:, :d],
+                alpha_pair_delay * Ud0[:, d:],
+            ],
+            dim=1,
+        )
+        ud1 = torch.cat(
+            [
+                alpha_pair_state * Ud1[:, :d],
+                alpha_pair_delay * Ud1[:, d:],
+            ],
+            dim=1,
+        )
+        L2_graph = loss_sink(
+            torch.cat([um0, um1], dim=1),
+            torch.cat([ud0, ud1], dim=1),
+        )
+        L2_marg0 = loss_sink(um0, ud0)
+        L2_marg1 = loss_sink(um1, ud1)
+        defect = 0.5 * (
+            torch.mean((Um0[:, :d] - Ud0[:, :d]) ** 2)
+            + torch.mean((Um1[:, :d] - Ud1[:, :d]) ** 2)
+        )
+        L2_raw = (
+            float(graph_weight) * L2_graph
+            + float(marg0_weight) * L2_marg0
+            + float(marg1_weight) * L2_marg1
+            + float(defect_weight) * defect
+        )
+        L2_norm = L2_raw / float(L_hits)
+        mathematical_integration = int(
+            np.sum(horizons + history_len, dtype=np.int64)
+        )
+        stats = {
+            "transition_pairs": pair_count,
+            "transition_unroll_observation_steps": int(
+                schedule.total_unrolled_observation_steps
+            ),
+            "actual_integration_observation_steps": mathematical_integration,
+            "actual_integration_euler_steps": int(
+                mathematical_integration * sub
+            ),
+            "vectorized_solver_observation_steps": int(
+                history_len + max_horizon
+            ),
+        }
+        return (
+            L2_norm,
+            L2_raw,
+            L2_graph,
+            L2_marg0,
+            L2_marg1,
+            defect,
+            stats,
+        )
+
+    def build_mechanism_block(k0, L_hits, loss_sink):
+        schedule = mechanism_sampler.sample(
+            args.mechanism_schedule,
+            pair_count=L_hits - 1,
+            reference_k0=k0,
+        )
+        reference_horizons = np.asarray(
+            mechanism_sampler.empirical_k[
+                np.asarray(schedule.reference_pair_indices, dtype=np.int64)
+            ],
+            dtype=np.int64,
+        )
+        if (
+            args.mechanism_schedule == "uniform_empirical_lag"
+            and not np.array_equal(
+                np.sort(np.asarray(schedule.model_horizons, dtype=np.int64)),
+                np.sort(reference_horizons),
+            )
+        ):
+            raise RuntimeError(
+                "uniform_empirical_lag violated its per-block fairness "
+                "contract: model K multiset differs from the sampled "
+                "reference recurrence K multiset"
+            )
+        for hasher, values in (
+            (mechanism_source_plan_hasher, schedule.source_indices),
+            (mechanism_horizon_plan_hasher, schedule.model_horizons),
+            (
+                mechanism_horizon_multiset_plan_hasher,
+                np.sort(schedule.model_horizons),
+            ),
+            (mechanism_reference_plan_hasher, schedule.reference_pair_indices),
+            (
+                mechanism_reference_horizon_multiset_plan_hasher,
+                np.sort(reference_horizons),
+            ),
+        ):
+            array = np.asarray(values, dtype="<i8")
+            hasher.update(np.asarray([len(array)], dtype="<i8").tobytes())
+            hasher.update(array.tobytes())
+        if args.mechanism_schedule in {
+            "uniform_fixed_median",
+            "uniform_empirical_lag",
+        }:
+            return build_uniform_mechanism_block(schedule, L_hits, loss_sink)
+        return build_sequential_mechanism_block(schedule, L_hits, loss_sink)
+
+    best_total = float("inf")
+    best_total_it = -1
+    best_total_sd = None
+    best_total_L1 = None
+    best_total_L2raw = None
+    best_total_L2norm = None
+
+    best_L2raw = float("inf")
+    best_L2_it = -1
+    best_L2_sd = None
+    best_L2_at_best = None
+    best_L1_at_best = None
+    best_L2norm_at_best = None
+
+    loss_tot_hist, loss_L1_hist, loss_L2norm_hist, loss_L2raw_hist, stage_hist = [], [], [], [], []
+    loss_L2graph_hist, loss_L2marg0_hist, loss_L2marg1_hist, loss_defect_hist = [], [], [], []
+    transition_pairs_hist = []
+    transition_unroll_obs_hist = []
+    actual_integration_obs_hist = []
+    actual_integration_euler_hist = []
+    vectorized_solver_obs_hist = []
+    total_transition_updates = 0
+    warmup_fingerprint_record = None
+    warmup_fingerprint_path = out_dir / "warmup_l1_fingerprint.json"
+    reference_checkpoint_sd = None
+    reference_checkpoint_metrics = None
+    reference_checkpoint_accounting = None
+    reference_checkpoint_plan_hashes = None
+
+    print("=" * 72)
+    print("Start training")
+    print(f"mode={mode} | section={section_description}")
+    print(loss_term_description)
+    print(f"Nsteps={Nsteps} | warm={warm_steps} | N_hits={len(hits)} | L_hits_fullbatch={L_hits_fullbatch}")
+    print(f"Stage cycle: stage2={stage2_steps_per_cycle}, stage1={stage1_steps_per_cycle}")
+    print("=" * 72)
+
+    net.train()
+    training_loop_started = time.perf_counter()
+    for step in range(Nsteps):
+        # The explicit global denominator lets a shortened post-warm-up dry run
+        # replay the first 3000 legacy updates exactly, rather than restarting
+        # the blur schedule over the shortened invocation.
+        tfrac = step / max(1, global_schedule_total_steps - 1)
+        blur = blur_start + (blur_end - blur_start) * tfrac
+        loss_sink = make_sinkhorn(blur)
+
+        if step < warm_steps:
+            stage = "stage1"
+        else:
+            cyc = stage2_steps_per_cycle + stage1_steps_per_cycle
+            if cyc <= 0:
+                stage = "stage1"
+            else:
+                k = (step - warm_steps) % cyc
+                stage = "stage2" if k < stage2_steps_per_cycle else "stage1"
+
+        opt = opt1 if stage == "stage1" else opt2
+        opt.zero_grad(set_to_none=True)
+        L1 = compute_L1(loss_sink)
+        update_transition_pairs = 0
+        update_transition_unroll_obs = 0
+        update_actual_integration_obs = 0
+        update_actual_integration_euler = 0
+        update_vectorized_solver_obs = 0
+
+        if stage == "stage1" or mode == "dim_only":
+            L2_norm = torch.tensor(0.0, device=device)
+            L2_raw = torch.tensor(0.0, device=device)
+            L2_graph_v = torch.tensor(0.0, device=device)
+            L2_marg0_v = torch.tensor(0.0, device=device)
+            L2_marg1_v = torch.tensor(0.0, device=device)
+            L2_defect_v = torch.tensor(0.0, device=device)
+            Ltot = L1
+        else:
+            L_hits = min(L_hits_fullbatch, len(hits))
+            if L_hits < 4:
+                raise RuntimeError(f"Too few hits for stage2: {len(hits)}")
+            k0max = len(hits) - L_hits
+            l2n_list, l2r_list = [], []
+            l2g_list, l2m0_list, l2m1_list, l2d_list = [], [], [], []
+            for _ in range(BATCH_SIZE_STAGE2):
+                k0 = np.random.randint(0, k0max + 1)
+                if mechanism_enabled:
+                    l2n, l2r, l2g, l2m0, l2m1, l2d, block_stats = (
+                        build_mechanism_block(k0, L_hits, loss_sink)
+                    )
+                    update_transition_pairs += int(
+                        block_stats["transition_pairs"]
+                    )
+                    update_transition_unroll_obs += int(
+                        block_stats["transition_unroll_observation_steps"]
+                    )
+                    update_actual_integration_obs += int(
+                        block_stats["actual_integration_observation_steps"]
+                    )
+                    update_actual_integration_euler += int(
+                        block_stats["actual_integration_euler_steps"]
+                    )
+                    update_vectorized_solver_obs += int(
+                        block_stats["vectorized_solver_observation_steps"]
+                    )
+                else:
+                    l2n, l2r, l2g, l2m0, l2m1, l2d = build_induced_block(
+                        k0, L_hits, loss_sink
+                    )
+                l2n_list.append(l2n)
+                l2r_list.append(l2r)
+                l2g_list.append(l2g)
+                l2m0_list.append(l2m0)
+                l2m1_list.append(l2m1)
+                l2d_list.append(l2d)
+            L2_norm = torch.stack(l2n_list).mean()
+            L2_raw = torch.stack(l2r_list).mean()
+            L2_graph_v = torch.stack(l2g_list).mean()
+            L2_marg0_v = torch.stack(l2m0_list).mean()
+            L2_marg1_v = torch.stack(l2m1_list).mean()
+            L2_defect_v = torch.stack(l2d_list).mean()
+            Ltot = L1 + float(w2_const) * L2_norm
+            if mechanism_enabled:
+                total_transition_updates += 1
+
+        Ltot.backward()
+        torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
+        opt.step()
+
+        ltot_v = float(Ltot.detach().cpu())
+        l1_v = float(L1.detach().cpu())
+        l2n_v = float(L2_norm.detach().cpu())
+        l2r_v = float(L2_raw.detach().cpu())
+        l2g_v = float(L2_graph_v.detach().cpu())
+        l2m0_v = float(L2_marg0_v.detach().cpu())
+        l2m1_v = float(L2_marg1_v.detach().cpu())
+        l2d_v = float(L2_defect_v.detach().cpu())
+
+        loss_tot_hist.append(ltot_v)
+        loss_L1_hist.append(l1_v)
+        loss_L2norm_hist.append(l2n_v)
+        loss_L2raw_hist.append(l2r_v)
+        loss_L2graph_hist.append(l2g_v)
+        loss_L2marg0_hist.append(l2m0_v)
+        loss_L2marg1_hist.append(l2m1_v)
+        loss_defect_hist.append(l2d_v)
+        stage_hist.append(stage)
+        transition_pairs_hist.append(int(update_transition_pairs))
+        transition_unroll_obs_hist.append(int(update_transition_unroll_obs))
+        actual_integration_obs_hist.append(int(update_actual_integration_obs))
+        actual_integration_euler_hist.append(int(update_actual_integration_euler))
+        vectorized_solver_obs_hist.append(int(update_vectorized_solver_obs))
+
+        if continuous_legacy_replay and step == warm_steps - 1:
+            actual_fingerprint = warmup_l1_sha256(
+                loss_L1_hist[:warm_steps]
+            )
+            cuda_rng_states = (
+                torch.cuda.get_rng_state_all()
+                if torch.cuda.is_available()
+                else []
+            )
+            warmup_runtime_fingerprints = {
+                "warmup_model_state_sha256": (
+                    canonical_runtime_state_sha256(net.state_dict())
+                ),
+                "warmup_opt1_state_sha256": (
+                    canonical_runtime_state_sha256(opt1.state_dict())
+                ),
+                "warmup_numpy_rng_state_sha256": (
+                    canonical_runtime_state_sha256(np.random.get_state())
+                ),
+                "warmup_torch_cpu_rng_state_sha256": (
+                    canonical_runtime_state_sha256(torch.get_rng_state())
+                ),
+                "warmup_torch_cuda_rng_state_sha256": (
+                    canonical_runtime_state_sha256(cuda_rng_states)
+                ),
+            }
+            fingerprint_matches = (
+                actual_fingerprint == expected_warmup_l1_sha256
+                if expected_warmup_l1_sha256
+                else None
+            )
+            warmup_fingerprint_record = {
+                "schema": WARMUP_L1_FINGERPRINT_SCHEMA,
+                "sha256": actual_fingerprint,
+                "expected_sha256": expected_warmup_l1_sha256 or None,
+                "matches_expected": fingerprint_matches,
+                "n_values": int(warm_steps),
+                "dtype": "float64-little-endian",
+                "runtime_state_fingerprint_schema": str(
+                    CANONICAL_RUNTIME_STATE_FINGERPRINT_SCHEMA
+                ),
+                "torch_cuda_rng_device_count": int(len(cuda_rng_states)),
+                "model_seed": int(seed),
+                "device": str(device),
+                "train_path": str(
+                    Path(args.train_path).expanduser().resolve()
+                ),
+                "train_shape": [int(T), int(d)],
+                "width": int(args.width),
+                "stage1_batch": int(stage1_batch),
+                "BATCH_SIZE_STAGE2": int(BATCH_SIZE_STAGE2),
+                "stage2_steps_per_cycle": int(stage2_steps_per_cycle),
+                "stage1_steps_per_cycle": int(stage1_steps_per_cycle),
+                "warm_steps": int(warm_steps),
+                "Nsteps_this_invocation": int(Nsteps),
+                "global_schedule_total_steps": int(
+                    global_schedule_total_steps
+                ),
+                "blur_start": float(blur_start),
+                "blur_end": float(blur_end),
+                "last_warmup_global_iter": int(step),
+                "last_warmup_blur": float(blur),
+                "mechanism_schedule_after_warmup": str(
+                    args.mechanism_schedule
+                ),
+            }
+            warmup_fingerprint_record.update(warmup_runtime_fingerprints)
+            with warmup_fingerprint_path.open(
+                "x", encoding="utf-8"
+            ) as handle:
+                json.dump(
+                    warmup_fingerprint_record,
+                    handle,
+                    indent=2,
+                    sort_keys=True,
+                )
+                handle.write("\n")
+            print("WARMUP_L1_SHA256:", actual_fingerprint)
+            print(
+                "WARMUP_MODEL_STATE_SHA256:",
+                warmup_runtime_fingerprints["warmup_model_state_sha256"],
+            )
+            print(
+                "WARMUP_OPT1_STATE_SHA256:",
+                warmup_runtime_fingerprints["warmup_opt1_state_sha256"],
+            )
+            print("Saved warm-up fingerprint:", warmup_fingerprint_path)
+            if fingerprint_matches is False:
+                raise RuntimeError(
+                    "Warm-up replay fingerprint mismatch; refusing to enter "
+                    "Stage 2. "
+                    f"expected={expected_warmup_l1_sha256}, "
+                    f"actual={actual_fingerprint}"
+                )
+
+        if (
+            continuous_legacy_replay
+            and reference_checkpoint_iter >= 0
+            and step == reference_checkpoint_iter
+        ):
+            reference_checkpoint_sd = cpu_state_dict(net)
+            reference_checkpoint_metrics = {
+                "reference_checkpoint_iter": int(step),
+                "reference_checkpoint_stage": str(stage),
+                "reference_checkpoint_L_total": float(ltot_v),
+                "reference_checkpoint_L1": float(l1_v),
+                "reference_checkpoint_L2_norm": float(l2n_v),
+                "reference_checkpoint_L2_raw": float(l2r_v),
+                "reference_checkpoint_blur": float(blur),
+                "reference_checkpoint_loss_timing": "pre_optimizer_step",
+                "reference_checkpoint_state_timing": "post_optimizer_step",
+            }
+            reference_checkpoint_accounting = {
+                "total_transition_updates": int(total_transition_updates),
+                "total_transition_pairs": int(
+                    np.sum(transition_pairs_hist, dtype=np.int64)
+                ),
+                "total_unrolled_observation_steps": int(
+                    np.sum(transition_unroll_obs_hist, dtype=np.int64)
+                ),
+                "total_actual_integration_observation_steps": int(
+                    np.sum(actual_integration_obs_hist, dtype=np.int64)
+                ),
+                "total_unrolled_euler_steps": int(
+                    np.sum(actual_integration_euler_hist, dtype=np.int64)
+                ),
+                "total_vectorized_solver_observation_steps": int(
+                    np.sum(vectorized_solver_obs_hist, dtype=np.int64)
+                ),
+                "training_loop_wall_clock_seconds": float(
+                    time.perf_counter() - training_loop_started
+                ),
+            }
+            reference_checkpoint_plan_hashes = {
+                "source_plan_sha256": (
+                    mechanism_source_plan_hasher.copy().hexdigest()
+                ),
+                "model_horizon_plan_sha256": (
+                    mechanism_horizon_plan_hasher.copy().hexdigest()
+                ),
+                "model_horizon_multiset_plan_sha256": (
+                    mechanism_horizon_multiset_plan_hasher.copy().hexdigest()
+                ),
+                "reference_pair_plan_sha256": (
+                    mechanism_reference_plan_hasher.copy().hexdigest()
+                ),
+                "reference_horizon_multiset_plan_sha256": (
+                    mechanism_reference_horizon_multiset_plan_hasher
+                    .copy()
+                    .hexdigest()
+                ),
+            }
+            print(
+                "Captured REFERENCE checkpoint at global iter "
+                f"{reference_checkpoint_iter}."
+            )
+
+        if stage == "stage2" and mode != "dim_only":
+            if ltot_v < best_total:
+                best_total = ltot_v
+                best_total_it = step
+                best_total_sd = cpu_state_dict(net)
+                best_total_L1 = l1_v
+                best_total_L2norm = l2n_v
+                best_total_L2raw = l2r_v
+                print(
+                    f"  --> [New BEST_TOTAL] Iter {step} | L_total={best_total:.6f} | "
+                    f"L1={best_total_L1:.6f} | L2_norm={best_total_L2norm:.6f} | L2_raw={best_total_L2raw:.6f}"
+                )
+            if l2r_v < best_L2raw:
+                best_L2raw = l2r_v
+                best_L2_it = step
+                best_L2_sd = cpu_state_dict(net)
+                best_L2_at_best = ltot_v
+                best_L1_at_best = l1_v
+                best_L2norm_at_best = l2n_v
+                print(
+                    f"  --> [New BEST_L2] Iter {step} | L2_raw={best_L2raw:.6f} | "
+                    f"L_total={best_L2_at_best:.6f} | L1={best_L1_at_best:.6f} | L2_norm={best_L2norm_at_best:.6f}"
+                )
+
+        if step % args.print_every == 0:
+            print(
+                f"Iter {step:5d} [{stage}] | Ltot={ltot_v:.6f} | L1={l1_v:.6f} | "
+                f"L2_norm={l2n_v:.6f} | L2_raw={l2r_v:.6f} | "
+                f"graph={l2g_v:.6f} | m0={l2m0_v:.6f} | m1={l2m1_v:.6f} | "
+                f"blur={blur:.3f}"
+            )
+
+    print("Training done.")
+    if (
+        continuous_legacy_replay
+        and reference_checkpoint_iter >= 0
+        and reference_checkpoint_sd is None
+    ):
+        if reference_checkpoint_iter < Nsteps:
+            raise RuntimeError(
+                "Internal error: requested reference checkpoint iteration "
+                f"{reference_checkpoint_iter} was reached but not captured"
+            )
+        print(
+            "REFERENCE checkpoint status: missing_not_reached "
+            f"(requested global iter {reference_checkpoint_iter}, "
+            f"last executed iter {Nsteps - 1})."
+        )
+    training_loop_wall_clock_seconds = float(
+        time.perf_counter() - training_loop_started
+    )
+
+    stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    path_final = out_dir / f"{save_prefix}_FINAL_{stamp}.p"
+    path_best = out_dir / f"{save_prefix}_BEST_{stamp}.p"
+    path_best_l2 = out_dir / f"{save_prefix}_BEST_L2_{stamp}.p"
+    path_selected = out_dir / f"{save_prefix}_SELECTED_{stamp}.p"
+    path_reference = (
+        out_dir
+        / (
+            f"{save_prefix}_REFERENCE_ITER"
+            f"{reference_checkpoint_iter}_{stamp}.p"
+        )
+        if reference_checkpoint_sd is not None
+        else None
+    )
+    if reference_checkpoint_iter < 0:
+        reference_checkpoint_status = "disabled"
+    elif reference_checkpoint_sd is not None:
+        reference_checkpoint_status = "saved"
+    else:
+        reference_checkpoint_status = "missing_not_reached"
+
+    config = dict(
+        seed=int(seed),
+        mode=str(mode),
+        section_description=str(section_description),
+        loss_term_description=str(loss_term_description),
+        init_checkpoint=str(args.init_checkpoint) if args.init_checkpoint else "",
+        dt_obs=float(dt_obs), dt_base=float(dt_base), sub=int(sub),
+        tau_pair=int(tau_pair), tau_delay=int(tau_delay), dim_delay=int(dim_delay),
+        L_sec=int(L_sec), M_landmarks=int(M_landmarks), cand_frac=float(cand_frac), q_speed=float(q_speed),
+        eps_in_mult=float(eps_in_mult), eps_out_mult=float(eps_out_mult),
+        L_hits_fullbatch=int(L_hits_fullbatch), BATCH_SIZE_STAGE2=int(BATCH_SIZE_STAGE2),
+        lr1=float(lr1), lr2=float(lr2), w2_const=float(w2_const),
+        alpha_pair_state=float(alpha_pair_state), alpha_pair_delay=float(alpha_pair_delay),
+        w_marg_u0=float(w_marg_u0), w_marg_u1=float(w_marg_u1), w_defect=float(w_defect),
+        graph_weight=float(graph_weight), marg0_weight=float(marg0_weight),
+        marg1_weight=float(marg1_weight), defect_weight=float(defect_weight),
+        blur_start=float(blur_start), blur_end=float(blur_end),
+        warm_steps=int(warm_steps), Nsteps=int(Nsteps), refine_steps=int(args.refine_steps),
+        min_t=int(min_t), eps_in=float(eps_in), eps_out=float(eps_out), nn_med=float(nn_med),
+        N_hits=int(len(hits)), implicit_N_hits=int(len(implicit_hits)), exact_z40_N_hits=int(len(exact_z40_hits)),
+        exact_z_ch=int(exact_z_ch), exact_z_level=float(args.exact_z_level), exact_direction=int(args.exact_direction),
+    )
+    if continuous_legacy_replay:
+        if warmup_fingerprint_record is None:
+            raise RuntimeError(
+                "Continuous legacy replay completed without a warm-up fingerprint"
+            )
+        config.update(
+            dict(
+                continuous_legacy_replay=True,
+                train_path=str(
+                    Path(args.train_path).expanduser().resolve()
+                ),
+                device=str(device),
+                width=int(args.width),
+                stage1_batch=int(stage1_batch),
+                BATCH_SIZE_STAGE2=int(BATCH_SIZE_STAGE2),
+                stage2_steps_per_cycle=int(stage2_steps_per_cycle),
+                stage1_steps_per_cycle=int(stage1_steps_per_cycle),
+                global_schedule_total_steps=int(
+                    global_schedule_total_steps
+                ),
+                global_schedule_last_executed_iter=int(Nsteps - 1),
+                checkpoint_loss_timing="pre_optimizer_step",
+                checkpoint_state_timing="post_optimizer_step",
+                warmup_l1_fingerprint_schema=str(
+                    WARMUP_L1_FINGERPRINT_SCHEMA
+                ),
+                warmup_l1_sha256=str(
+                    warmup_fingerprint_record["sha256"]
+                ),
+                expected_warmup_l1_sha256=(
+                    expected_warmup_l1_sha256 or None
+                ),
+                warmup_l1_fingerprint_matches_expected=(
+                    warmup_fingerprint_record["matches_expected"]
+                ),
+                runtime_state_fingerprint_schema=str(
+                    CANONICAL_RUNTIME_STATE_FINGERPRINT_SCHEMA
+                ),
+                warmup_model_state_sha256=str(
+                    warmup_fingerprint_record[
+                        "warmup_model_state_sha256"
+                    ]
+                ),
+                warmup_opt1_state_sha256=str(
+                    warmup_fingerprint_record[
+                        "warmup_opt1_state_sha256"
+                    ]
+                ),
+                warmup_numpy_rng_state_sha256=str(
+                    warmup_fingerprint_record[
+                        "warmup_numpy_rng_state_sha256"
+                    ]
+                ),
+                warmup_torch_cpu_rng_state_sha256=str(
+                    warmup_fingerprint_record[
+                        "warmup_torch_cpu_rng_state_sha256"
+                    ]
+                ),
+                warmup_torch_cuda_rng_state_sha256=str(
+                    warmup_fingerprint_record[
+                        "warmup_torch_cuda_rng_state_sha256"
+                    ]
+                ),
+                torch_cuda_rng_device_count=int(
+                    warmup_fingerprint_record[
+                        "torch_cuda_rng_device_count"
+                    ]
+                ),
+                warmup_l1_fingerprint_path=str(
+                    warmup_fingerprint_path
+                ),
+                reference_checkpoint_iter=(
+                    int(reference_checkpoint_iter)
+                    if reference_checkpoint_iter >= 0
+                    else None
+                ),
+                reference_checkpoint_status=str(
+                    reference_checkpoint_status
+                ),
+                reference_checkpoint_path=(
+                    str(path_reference) if path_reference is not None else None
+                ),
+            )
+        )
+        if reference_checkpoint_metrics is not None:
+            config.update(reference_checkpoint_metrics)
+    if mechanism_enabled:
+        config.update(
+            dict(
+                rebuttal_mechanism_ablation=True,
+                mechanism_variant_name=str(args.mechanism_variant_name),
+                mechanism_schedule=str(args.mechanism_schedule),
+                mechanism_loss=str(args.mechanism_loss),
+                mechanism_seed_offset=int(args.mechanism_seed_offset),
+                recurrence_sources=bool(
+                    mechanism_properties["recurrence_sources"]
+                ),
+                state_paired_K=bool(mechanism_properties["state_paired_K"]),
+                source_description=str(
+                    mechanism_properties["source_description"]
+                ),
+                plan_fingerprint_schema=str(
+                    MECHANISM_PLAN_FINGERPRINT_SCHEMA
+                ),
+                plan_fingerprint_scope="full_training_run",
+                uniform_target_semantics=(
+                    "observed_transition_at_source_plus_K"
+                    if args.mechanism_schedule
+                    in {"uniform_fixed_median", "uniform_empirical_lag"}
+                    else None
+                ),
+                uniform_source_common_max_horizon=(
+                    int(mechanism_sampler.uniform_max_horizon)
+                    if args.mechanism_schedule
+                    in {"uniform_fixed_median", "uniform_empirical_lag"}
+                    else None
+                ),
+                uniform_source_common_pool_size=(
+                    int(len(mechanism_sampler.uniform_source_pool))
+                    if args.mechanism_schedule
+                    in {"uniform_fixed_median", "uniform_empirical_lag"}
+                    else None
+                ),
+                source_plan_sha256=mechanism_source_plan_hasher.hexdigest(),
+                model_horizon_plan_sha256=(
+                    mechanism_horizon_plan_hasher.hexdigest()
+                ),
+                model_horizon_multiset_plan_sha256=(
+                    mechanism_horizon_multiset_plan_hasher.hexdigest()
+                ),
+                reference_pair_plan_sha256=(
+                    mechanism_reference_plan_hasher.hexdigest()
+                ),
+                reference_horizon_multiset_plan_sha256=(
+                    mechanism_reference_horizon_multiset_plan_hasher
+                    .hexdigest()
+                ),
+                K_fixed_from_training_recurrence_median=int(
+                    mechanism_sampler.fixed_median_k
+                ),
+                random_event_count=int(len(mechanism_sampler.random_hits)),
+                random_event_minimum_gap=int(
+                    np.min(np.diff(mechanism_sampler.random_hits))
+                ),
+                total_transition_updates=int(total_transition_updates),
+                total_transition_pairs=int(np.sum(transition_pairs_hist)),
+                total_unrolled_observation_steps=int(
+                    np.sum(transition_unroll_obs_hist)
+                ),
+                total_actual_integration_observation_steps=int(
+                    np.sum(actual_integration_obs_hist)
+                ),
+                total_unrolled_euler_steps=int(
+                    np.sum(actual_integration_euler_hist)
+                ),
+                total_vectorized_solver_observation_steps=int(
+                    np.sum(vectorized_solver_obs_hist)
+                ),
+                training_loop_wall_clock_seconds=float(
+                    training_loop_wall_clock_seconds
+                ),
+            )
+        )
+
+    base_payload = dict(
+        config=config,
+        model=dict(transformer=scaler, state_dict=None),
+        stats=dict(
+            hits=hits,
+            taus_steps=taus,
+            visit_lens=visit_lens,
+            C_dw=C_dw,
+            u_mean_c=u_mean_c,
+            u_std_c=u_std_c,
+            u_mean=u_mean,
+            u_std=u_std,
+            implicit_hits=implicit_hits,
+            exact_z40_hits=exact_z40_hits,
+            exact_xm10_hits=exact_xm10_hits,
+            exact_x0_hits=exact_x0_hits,
+        ),
+        train_hist=dict(
+            stage=np.array(stage_hist, dtype=object),
+            L_total=np.array(loss_tot_hist, dtype=np.float64),
+            L1=np.array(loss_L1_hist, dtype=np.float64),
+            L2_norm=np.array(loss_L2norm_hist, dtype=np.float64),
+            L2_raw=np.array(loss_L2raw_hist, dtype=np.float64),
+            L2_graph_unweighted=np.array(loss_L2graph_hist, dtype=np.float64),
+            L2_source_marginal_unweighted=np.array(loss_L2marg0_hist, dtype=np.float64),
+            L2_target_marginal_unweighted=np.array(loss_L2marg1_hist, dtype=np.float64),
+            L2_defect_unweighted=np.array(loss_defect_hist, dtype=np.float64),
+        )
+    )
+    if mechanism_enabled:
+        base_payload["stats"]["mechanism_random_hits"] = (
+            mechanism_sampler.random_hits
+        )
+        base_payload["train_hist"].update(
+            dict(
+                transition_pairs=np.array(
+                    transition_pairs_hist, dtype=np.int64
+                ),
+                transition_unroll_observation_steps=np.array(
+                    transition_unroll_obs_hist, dtype=np.int64
+                ),
+                actual_integration_observation_steps=np.array(
+                    actual_integration_obs_hist, dtype=np.int64
+                ),
+                actual_integration_euler_steps=np.array(
+                    actual_integration_euler_hist, dtype=np.int64
+                ),
+                vectorized_solver_observation_steps=np.array(
+                    vectorized_solver_obs_hist, dtype=np.int64
+                ),
+            )
+        )
+
+    payload_final = dict(base_payload)
+    payload_final["model"] = dict(transformer=scaler, state_dict=cpu_state_dict(net))
+    with open(path_final, "wb") as f:
+        pickle.dump(payload_final, f)
+    print("Saved FINAL:", path_final)
+
+    if reference_checkpoint_sd is not None:
+        if (
+            reference_checkpoint_metrics is None
+            or reference_checkpoint_accounting is None
+            or reference_checkpoint_plan_hashes is None
+        ):
+            raise RuntimeError(
+                "REFERENCE state was captured without its prefix audit data"
+            )
+        reference_prefix_length = int(reference_checkpoint_iter + 1)
+        payload_reference = dict(base_payload)
+        reference_config = dict(config)
+        reference_config.update(reference_checkpoint_metrics)
+        reference_config.update(reference_checkpoint_accounting)
+        reference_config.update(reference_checkpoint_plan_hashes)
+        reference_config.update(
+            dict(
+                checkpoint_role="REFERENCE_GLOBAL_ITER",
+                checkpoint_payload_scope=(
+                    "training_prefix_through_reference_iter_inclusive"
+                ),
+                plan_fingerprint_scope=(
+                    "training_prefix_through_reference_iter_inclusive"
+                ),
+                history_prefix_length=int(reference_prefix_length),
+                global_schedule_last_executed_iter=int(
+                    reference_checkpoint_iter
+                ),
+                selected_source="REFERENCE_GLOBAL_ITER",
+                selected_iter=int(reference_checkpoint_iter),
+                selected_path=str(path_reference),
+            )
+        )
+        payload_reference["config"] = reference_config
+        payload_reference["train_hist"] = {
+            key: np.asarray(values)[:reference_prefix_length].copy()
+            for key, values in base_payload["train_hist"].items()
+        }
+        payload_reference["model"] = dict(
+            transformer=scaler,
+            state_dict=reference_checkpoint_sd,
+        )
+        with open(path_reference, "xb") as f:
+            pickle.dump(payload_reference, f)
+        print(
+            "Saved REFERENCE:",
+            path_reference,
+            f"(global iter {reference_checkpoint_iter})",
+        )
+
+    if best_total_sd is not None:
+        payload_best = dict(base_payload)
+        payload_best["config"] = dict(config)
+        payload_best["config"].update(dict(
+            best_total_iter=int(best_total_it),
+            best_total=float(best_total),
+            best_total_L1=float(best_total_L1),
+            best_total_L2_norm=float(best_total_L2norm),
+            best_total_L2_raw=float(best_total_L2raw),
+        ))
+        payload_best["model"] = dict(transformer=scaler, state_dict=best_total_sd)
+        with open(path_best, "wb") as f:
+            pickle.dump(payload_best, f)
+        print(f"Saved BEST_TOTAL: {path_best}  (L_total={best_total:.6f} @ iter {best_total_it})")
+    else:
+        print("No BEST_TOTAL saved.")
+
+    if best_L2_sd is not None:
+        payload_best_l2 = dict(base_payload)
+        payload_best_l2["config"] = dict(config)
+        payload_best_l2["config"].update(dict(
+            best_l2_iter=int(best_L2_it),
+            best_l2_L2_raw=float(best_L2raw),
+            best_l2_L_total=float(best_L2_at_best),
+            best_l2_L1=float(best_L1_at_best),
+            best_l2_L2_norm=float(best_L2norm_at_best),
+        ))
+        payload_best_l2["model"] = dict(transformer=scaler, state_dict=best_L2_sd)
+        with open(path_best_l2, "wb") as f:
+            pickle.dump(payload_best_l2, f)
+        print(f"Saved BEST_L2: {path_best_l2}  (L2_raw={best_L2raw:.6f} @ iter {best_L2_it})")
+    else:
+        print("No BEST_L2 saved.")
+
+    if mode == "dim_only":
+        selected_sd = cpu_state_dict(net)
+        selected_source = "FINAL_DIM_ONLY"
+    elif best_total_sd is not None:
+        selected_sd = best_total_sd
+        selected_source = "BEST_TOTAL"
+    else:
+        selected_sd = cpu_state_dict(net)
+        selected_source = "FINAL_FALLBACK"
+
+    payload_selected = dict(base_payload)
+    payload_selected["config"] = dict(config)
+    payload_selected["config"].update(dict(
+        selected_source=selected_source,
+        selected_iter=(
+            int(Nsteps - 1)
+            if selected_source in {"FINAL_DIM_ONLY", "FINAL_FALLBACK"}
+            else int(best_total_it)
+        ),
+        selected_total_loss=(
+            None
+            if selected_source in {"FINAL_DIM_ONLY", "FINAL_FALLBACK"}
+            else float(best_total)
+        ),
+        selected_path=str(path_selected),
+    ))
+    payload_selected["model"] = dict(transformer=scaler, state_dict=selected_sd)
+    with open(path_selected, "wb") as f:
+        pickle.dump(payload_selected, f)
+    print(f"Saved SELECTED: {path_selected}  source={selected_source}")
+
+    plot_history(out_dir / f"{save_prefix}_loss_{stamp}.png",
+                 [loss_tot_hist, loss_L1_hist], ["L_total", "L1"], "Loss")
+    plot_history(out_dir / f"{save_prefix}_L2norm_{stamp}.png",
+                 [loss_L2norm_hist], ["L2_norm"], "Stage2 loss norm")
+    plot_history(out_dir / f"{save_prefix}_L2raw_{stamp}.png",
+                 [loss_L2raw_hist], ["L2_raw"], "Stage2 loss raw")
+    plot_history(out_dir / f"{save_prefix}_L2components_{stamp}.png",
+                 [loss_L2graph_hist, loss_L2marg0_hist, loss_L2marg1_hist, loss_defect_hist],
+                 ["graph", "source_marg", "target_marg", "defect"],
+                 "Unweighted recurrence-block components")
+
+    if mechanism_enabled:
+        transition_updates = max(1, int(total_transition_updates))
+        diagnostics = {
+            "model_seed": int(seed),
+            "variant": str(args.mechanism_variant_name),
+            "schedule_mode": str(args.mechanism_schedule),
+            "loss_mode": str(args.mechanism_loss),
+            "recurrence_sources": bool(
+                mechanism_properties["recurrence_sources"]
+            ),
+            "state_paired_K": bool(mechanism_properties["state_paired_K"]),
+            "graph_term": bool(graph_weight != 0.0),
+            "marginal_terms": bool(
+                marg0_weight != 0.0 or marg1_weight != 0.0
+            ),
+            "graph_weight": float(graph_weight),
+            "source_marginal_weight": float(marg0_weight),
+            "target_marginal_weight": float(marg1_weight),
+            "defect_weight": float(defect_weight),
+            "N_recurrence_hits": int(len(hits)),
+            "N_random_matched_hits": int(len(mechanism_sampler.random_hits)),
+            "minimum_inter_event_gap": int(L_sec),
+            "random_event_minimum_gap": int(
+                np.min(np.diff(mechanism_sampler.random_hits))
+            ),
+            "K_fixed": int(mechanism_sampler.fixed_median_k),
+            "empirical_K_mean": float(np.mean(mechanism_sampler.empirical_k)),
+            "empirical_K_median": float(
+                np.median(mechanism_sampler.empirical_k)
+            ),
+            "total_transition_updates": int(total_transition_updates),
+            "total_transition_pairs": int(np.sum(transition_pairs_hist)),
+            "total_unrolled_observation_steps": int(
+                np.sum(transition_unroll_obs_hist)
+            ),
+            "total_actual_integration_observation_steps": int(
+                np.sum(actual_integration_obs_hist)
+            ),
+            "total_unrolled_euler_steps": int(
+                np.sum(actual_integration_euler_hist)
+            ),
+            "total_vectorized_solver_observation_steps": int(
+                np.sum(vectorized_solver_obs_hist)
+            ),
+            "mean_transition_pairs_per_update": float(
+                np.sum(transition_pairs_hist) / transition_updates
+            ),
+            "mean_unrolled_observation_steps_per_update": float(
+                np.sum(transition_unroll_obs_hist) / transition_updates
+            ),
+            "training_loop_wall_clock_seconds": float(
+                training_loop_wall_clock_seconds
+            ),
+            "normalization_denominator": "L_hits",
+            "plan_fingerprint_schema": str(
+                MECHANISM_PLAN_FINGERPRINT_SCHEMA
+            ),
+            "plan_fingerprint_scope": "full_training_run",
+            "source_plan_sha256": mechanism_source_plan_hasher.hexdigest(),
+            "model_horizon_plan_sha256": (
+                mechanism_horizon_plan_hasher.hexdigest()
+            ),
+            "model_horizon_multiset_plan_sha256": (
+                mechanism_horizon_multiset_plan_hasher.hexdigest()
+            ),
+            "reference_pair_plan_sha256": (
+                mechanism_reference_plan_hasher.hexdigest()
+            ),
+            "reference_horizon_multiset_plan_sha256": (
+                mechanism_reference_horizon_multiset_plan_hasher.hexdigest()
+            ),
+            "uniform_source_semantics": (
+                "independent_uniform_common_legal_pool_without_replacement"
+                if args.mechanism_schedule
+                in {"uniform_fixed_median", "uniform_empirical_lag"}
+                else None
+            ),
+            "uniform_source_common_max_horizon": (
+                int(mechanism_sampler.uniform_max_horizon)
+                if args.mechanism_schedule
+                in {"uniform_fixed_median", "uniform_empirical_lag"}
+                else None
+            ),
+            "uniform_source_common_pool_size": (
+                int(len(mechanism_sampler.uniform_source_pool))
+                if args.mechanism_schedule
+                in {"uniform_fixed_median", "uniform_empirical_lag"}
+                else None
+            ),
+            "uniform_target_semantics": (
+                "observed_transition_at_source_plus_K"
+                if args.mechanism_schedule
+                in {"uniform_fixed_median", "uniform_empirical_lag"}
+                else None
+            ),
+        }
+        if continuous_legacy_replay:
+            diagnostics.update(
+                {
+                    "continuous_legacy_replay": True,
+                    "train_path": str(
+                        Path(args.train_path).expanduser().resolve()
+                    ),
+                    "device": str(device),
+                    "width": int(args.width),
+                    "stage1_batch": int(stage1_batch),
+                    "BATCH_SIZE_STAGE2": int(BATCH_SIZE_STAGE2),
+                    "stage2_steps_per_cycle": int(
+                        stage2_steps_per_cycle
+                    ),
+                    "stage1_steps_per_cycle": int(
+                        stage1_steps_per_cycle
+                    ),
+                    "global_schedule_total_steps": int(
+                        global_schedule_total_steps
+                    ),
+                    "global_schedule_last_executed_iter": int(Nsteps - 1),
+                    "checkpoint_loss_timing": "pre_optimizer_step",
+                    "checkpoint_state_timing": "post_optimizer_step",
+                    "warmup_l1_fingerprint_schema": str(
+                        WARMUP_L1_FINGERPRINT_SCHEMA
+                    ),
+                    "warmup_l1_sha256": str(
+                        warmup_fingerprint_record["sha256"]
+                    ),
+                    "expected_warmup_l1_sha256": (
+                        expected_warmup_l1_sha256 or None
+                    ),
+                    "warmup_l1_fingerprint_matches_expected": (
+                        warmup_fingerprint_record["matches_expected"]
+                    ),
+                    "runtime_state_fingerprint_schema": str(
+                        CANONICAL_RUNTIME_STATE_FINGERPRINT_SCHEMA
+                    ),
+                    "warmup_model_state_sha256": str(
+                        warmup_fingerprint_record[
+                            "warmup_model_state_sha256"
+                        ]
+                    ),
+                    "warmup_opt1_state_sha256": str(
+                        warmup_fingerprint_record[
+                            "warmup_opt1_state_sha256"
+                        ]
+                    ),
+                    "warmup_numpy_rng_state_sha256": str(
+                        warmup_fingerprint_record[
+                            "warmup_numpy_rng_state_sha256"
+                        ]
+                    ),
+                    "warmup_torch_cpu_rng_state_sha256": str(
+                        warmup_fingerprint_record[
+                            "warmup_torch_cpu_rng_state_sha256"
+                        ]
+                    ),
+                    "warmup_torch_cuda_rng_state_sha256": str(
+                        warmup_fingerprint_record[
+                            "warmup_torch_cuda_rng_state_sha256"
+                        ]
+                    ),
+                    "torch_cuda_rng_device_count": int(
+                        warmup_fingerprint_record[
+                            "torch_cuda_rng_device_count"
+                        ]
+                    ),
+                    "reference_checkpoint_iter": (
+                        int(reference_checkpoint_iter)
+                        if reference_checkpoint_iter >= 0
+                        else None
+                    ),
+                    "reference_checkpoint_status": str(
+                        reference_checkpoint_status
+                    ),
+                    "reference_checkpoint_path": (
+                        str(path_reference)
+                        if path_reference is not None
+                        else None
+                    ),
+                }
+            )
+        diagnostics_path = out_dir / "mechanism_training_diagnostics.json"
+        with diagnostics_path.open("x", encoding="utf-8") as handle:
+            json.dump(diagnostics, handle, indent=2, sort_keys=True)
+            handle.write("\n")
+        print("Saved mechanism diagnostics:", diagnostics_path)
+
+    return str(path_selected)
+
+
+# =========================================================
+# Runner for all modes
+# =========================================================
+def run_all(args):
+    script = Path(__file__).resolve()
+    run_root = Path(args.run_root)
+    log_dir = run_root / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+
+    prime_modes = args.all_modes.split(",") if args.all_modes else ["full", "graph_only", "marginals_only", "no_source_marginal", "no_target_marginal"]
+    prime_modes = [m.strip() for m in prime_modes if m.strip()]
+
+    # 1) Shared DIM pretrain checkpoint.
+    print("=" * 80)
+    print("Step 1/2: Training shared DIM pretrain checkpoint")
+    print("=" * 80)
+    cmd_dim = [
+        sys.executable, str(script),
+        "--mode", "dim_only",
+        "--train_path", args.train_path,
+        "--run_root", args.run_root,
+        "--seed", str(args.seed),
+        "--dt_obs", str(args.dt_obs),
+        "--dt_base", str(args.dt_base),
+        "--Nsteps", str(args.warm_steps),
+        "--warm_steps", str(args.warm_steps),
+        "--width", str(args.width),
+        "--print_every", str(args.print_every),
+        "--tau_delay", str(args.tau_delay),
+        "--dim_delay", str(args.dim_delay),
+        "--delay_ch", str(args.delay_ch),
+        "--L_hits_fullbatch", str(args.L_hits_fullbatch),
+        "--BATCH_SIZE_STAGE2", str(args.BATCH_SIZE_STAGE2),
+        "--w2_const", str(args.w2_const),
+        "--cand_frac", str(args.cand_frac),
+        "--q_speed", str(args.q_speed),
+        "--M_landmarks", str(args.M_landmarks),
+        "--L_sec", str(args.L_sec),
+        "--eps_in_mult", str(args.eps_in_mult),
+        "--eps_out_mult", str(args.eps_out_mult),
+        "--tau_pair", str(args.tau_pair),
+        "--stage1_batch", str(args.stage1_batch),
+        "--lr1", str(args.lr1),
+        "--lr2", str(args.lr2),
+        "--alpha_pair_state", str(args.alpha_pair_state),
+        "--alpha_pair_delay", str(args.alpha_pair_delay),
+        "--w_marg_u0", str(args.w_marg_u0),
+        "--w_marg_u1", str(args.w_marg_u1),
+        "--w_defect", str(args.w_defect),
+        "--blur_start", str(args.blur_start),
+        "--blur_end", str(args.blur_end),
+        "--stage2_steps_per_cycle", str(args.stage2_steps_per_cycle),
+        "--stage1_steps_per_cycle", str(args.stage1_steps_per_cycle),
+    ]
+    if args.cpu:
+        cmd_dim.append("--cpu")
+
+    dim_log = log_dir / f"lossterm_dim_only_seed{args.seed}.log"
+    print("Running:", " ".join(cmd_dim))
+    print("Log:", dim_log)
+    with open(dim_log, "w") as f:
+        proc = subprocess.run(cmd_dim, stdout=f, stderr=subprocess.STDOUT, check=False)
+    if proc.returncode != 0:
+        raise RuntimeError(f"DIM pretrain failed. Check log: {dim_log}")
+
+    dim_folder = run_root / f"dim_only_seed{args.seed}"
+    init_ckpt = find_selected_checkpoint(dim_folder)
+    print("Shared DIM checkpoint:", init_ckpt)
+
+    # 2) PRIME loss-term variants.
+    print("=" * 80)
+    print("Step 2/2: Running PRIME loss-term variants from the same DIM checkpoint")
+    print("Modes:", prime_modes)
+    print("=" * 80)
+
+    for mode in prime_modes:
+        log_path = log_dir / f"lossterm_{mode}_seed{args.seed}.log"
+        cmd = [
+            sys.executable, str(script),
+            "--mode", mode,
+            "--train_path", args.train_path,
+            "--run_root", args.run_root,
+            "--seed", str(args.seed),
+            "--dt_obs", str(args.dt_obs),
+            "--dt_base", str(args.dt_base),
+            "--Nsteps", str(args.refine_steps),
+            "--warm_steps", "0",
+            "--refine_steps", str(args.refine_steps),
+            "--init_checkpoint", str(init_ckpt),
+            "--width", str(args.width),
+            "--print_every", str(args.print_every),
+            "--tau_delay", str(args.tau_delay),
+            "--dim_delay", str(args.dim_delay),
+            "--delay_ch", str(args.delay_ch),
+            "--L_hits_fullbatch", str(args.L_hits_fullbatch),
+            "--BATCH_SIZE_STAGE2", str(args.BATCH_SIZE_STAGE2),
+            "--w2_const", str(args.w2_const),
+            "--cand_frac", str(args.cand_frac),
+            "--q_speed", str(args.q_speed),
+            "--M_landmarks", str(args.M_landmarks),
+            "--L_sec", str(args.L_sec),
+            "--eps_in_mult", str(args.eps_in_mult),
+            "--eps_out_mult", str(args.eps_out_mult),
+            "--tau_pair", str(args.tau_pair),
+            "--stage1_batch", str(args.stage1_batch),
+            "--lr1", str(args.lr1),
+            "--lr2", str(args.lr2),
+            "--alpha_pair_state", str(args.alpha_pair_state),
+            "--alpha_pair_delay", str(args.alpha_pair_delay),
+            "--w_marg_u0", str(args.w_marg_u0),
+            "--w_marg_u1", str(args.w_marg_u1),
+            "--w_defect", str(args.w_defect),
+            "--blur_start", str(args.blur_start),
+            "--blur_end", str(args.blur_end),
+            "--stage2_steps_per_cycle", str(args.stage2_steps_per_cycle),
+            "--stage1_steps_per_cycle", str(args.stage1_steps_per_cycle),
+            "--exact_z_level", str(args.exact_z_level),
+            "--exact_direction", str(args.exact_direction),
+        ]
+        if args.exact_z_ch is not None:
+            cmd.extend(["--exact_z_ch", str(args.exact_z_ch)])
+        if args.cpu:
+            cmd.append("--cpu")
+
+        print("=" * 80)
+        print("Running:", " ".join(cmd))
+        print("Log:", log_path)
+        print("=" * 80)
+        with open(log_path, "w") as f:
+            proc = subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT, check=False)
+        if proc.returncode != 0:
+            raise RuntimeError(f"Run failed for mode={mode}. Check log: {log_path}")
+        print(f"Finished mode={mode}. Log saved to {log_path}")
+
+    print("All loss-term ablation runs finished.")
+
+
+# =========================================================
+# CLI
+# =========================================================
+def build_arg_parser():
+    p = argparse.ArgumentParser(description="Lorenz PRIME loss-term ablation")
+    p.add_argument("--all", action="store_true", help="Run shared DIM pretrain plus all PRIME loss-term variants.")
+    p.add_argument("--all_modes", type=str, default="full,graph_only,marginals_only,no_source_marginal,no_target_marginal",
+                   help="Comma-separated PRIME loss-term modes for --all.")
+    p.add_argument("--mode", type=str, default="full",
+                   choices=sorted(LOSS_TERM_MODES))
+    p.add_argument("--train_path", type=str, default=os.environ.get("TRAIN_DATA_PATH", ""))
+    p.add_argument("--run_root", type=str, default="./lorenz_ablation_loss_terms")
+    p.add_argument("--init_checkpoint", type=str, default="")
+    p.add_argument("--cpu", action="store_true")
+    p.add_argument(
+        "--fail_if_out_dir_exists",
+        action="store_true",
+        help="Refuse to write into an existing mode/seed output directory.",
+    )
+    p.add_argument(
+        "--rebuttal_mechanism_ablation",
+        action="store_true",
+        help="Enable the opt-in NeurIPS rebuttal mechanism schedules.",
+    )
+    p.add_argument(
+        "--mechanism_schedule",
+        choices=MECHANISM_SCHEDULE_MODES,
+        default="recurrence_correct",
+    )
+    p.add_argument(
+        "--mechanism_loss",
+        choices=MECHANISM_LOSS_MODES,
+        default="full_graph_plus_marginals",
+    )
+    p.add_argument("--mechanism_variant_name", type=str, default="")
+    p.add_argument("--mechanism_seed_offset", type=int, default=190041)
+    p.add_argument(
+        "--continuous_legacy_replay",
+        action="store_true",
+        help=(
+            "Opt in to a single-process DIM warm-up plus mechanism Stage 2. "
+            "This permits mechanism runs without --init_checkpoint while "
+            "preserving optimizer, RNG, and global blur-schedule continuity."
+        ),
+    )
+    p.add_argument(
+        "--global_schedule_total_steps",
+        type=int,
+        default=0,
+        help=(
+            "Global blur-schedule length for --continuous_legacy_replay. "
+            "Use 4000 for both full runs and shortened post-warm-up dry runs. "
+            "Zero keeps the historical denominator Nsteps."
+        ),
+    )
+    p.add_argument(
+        "--expected_warmup_l1_sha256",
+        type=str,
+        default="",
+        help=(
+            "Required canonical warm-up L1 SHA-256 for "
+            "--continuous_legacy_replay. A mismatch aborts before the first "
+            "Stage-2 update."
+        ),
+    )
+    p.add_argument(
+        "--reference_checkpoint_iter",
+        type=int,
+        default=-1,
+        help=(
+            "Optional global post-update iteration at which to save a "
+            "REFERENCE checkpoint. If a shortened run does not reach it, "
+            "the checkpoint is explicitly recorded as missing_not_reached."
+        ),
+    )
+
+    # General config
+    p.add_argument("--seed", type=int, default=1000)
+    p.add_argument("--dt_obs", type=float, default=0.1)
+    p.add_argument("--dt_base", type=float, default=0.1)
+    p.add_argument("--width", type=int, default=100)
+
+    # Section construction
+    p.add_argument("--cand_frac", type=float, default=0.5)
+    p.add_argument("--q_speed", type=float, default=0.3)
+    p.add_argument("--M_landmarks", type=int, default=200)
+    p.add_argument("--L_sec", type=int, default=5)
+    p.add_argument("--tau_delay", type=int, default=1)
+    p.add_argument("--dim_delay", type=int, default=5)
+    p.add_argument("--delay_ch", type=int, default=0)
+    p.add_argument("--eps_in_mult", type=float, default=0.35)
+    p.add_argument("--eps_out_mult", type=float, default=1.8)
+    p.add_argument("--random_hit_seed_offset", type=int, default=88017)
+
+    # Exact-section options
+    p.add_argument("--exact_z_ch", type=int, default=None,
+                   help="Raw-data channel for Z. Default: 1 for 2D partial [X,Z], 2 for full [X,Y,Z].")
+    p.add_argument("--exact_z_level", type=float, default=40.0)
+    p.add_argument("--exact_direction", type=int, default=+1, choices=[-1, 0, 1])
+
+    # Training config
+    p.add_argument("--Nsteps", type=int, default=4000)
+    p.add_argument("--warm_steps", type=int, default=3000)
+    p.add_argument("--refine_steps", type=int, default=1000)
+    p.add_argument("--tau_pair", type=int, default=2)
+    p.add_argument("--stage1_batch", type=int, default=512)
+    p.add_argument("--lr1", type=float, default=1e-3)
+    p.add_argument("--lr2", type=float, default=1e-3)
+    p.add_argument("--L_hits_fullbatch", type=int, default=32)
+    p.add_argument("--BATCH_SIZE_STAGE2", type=int, default=16)
+    p.add_argument("--alpha_pair_state", type=float, default=1.0)
+    p.add_argument("--alpha_pair_delay", type=float, default=0.7)
+    p.add_argument("--w_marg_u0", type=float, default=0.20)
+    p.add_argument("--w_marg_u1", type=float, default=0.20)
+    p.add_argument("--w_defect", type=float, default=0.0)
+    p.add_argument("--blur_start", type=float, default=0.2)
+    p.add_argument("--blur_end", type=float, default=0.1)
+    p.add_argument("--stage2_steps_per_cycle", type=int, default=1)
+    p.add_argument("--stage1_steps_per_cycle", type=int, default=1)
+    p.add_argument("--w2_const", type=float, default=0.5)
+    p.add_argument("--print_every", type=int, default=100)
+    return p
+
+if __name__ == "__main__":
+    parser = build_arg_parser()
+    args = parser.parse_args()
+    if args.all:
+        run_all(args)
+    else:
+        train_one(args)

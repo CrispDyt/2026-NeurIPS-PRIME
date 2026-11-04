@@ -1,0 +1,6 @@
+{
+  "comparison": "Against independently audited statistics prepared earlier from original projects",
+  "numeric_fields_compared": 539,
+  "mismatches": [],
+  "n1_std_convention": "Updated from omitted to population std zero with valid count"
+}

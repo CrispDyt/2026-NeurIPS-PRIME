@@ -1,0 +1,973 @@
+{
+  "description": "Curated original scripts and notebook code, source hashes, selected assets. Notebook outputs excluded.",
+  "files": [
+    {
+      "source": "Lorenz/Ab_Lorenz_1.py",
+      "destination": "experiments/ablations/legacy/Ab_Lorenz_1.py",
+      "source_sha256": "f8da16fe86599e35cf3f09ac74bde61e5084922c149b642822ea949c9fc1ac01",
+      "destination_sha256": "f8da16fe86599e35cf3f09ac74bde61e5084922c149b642822ea949c9fc1ac01",
+      "bytes": 33267,
+      "role": "original implementation; run.py supplies portable paths"
+    },
+    {
+      "source": "Lorenz/Ab_Lorenz_2.py",
+      "destination": "experiments/ablations/legacy/Ab_Lorenz_2.py",
+      "source_sha256": "a11e5bc38a843747f7898531ebe8e8b0953572a3d333f60f515a6e7d4196bf39",
+      "destination_sha256": "a11e5bc38a843747f7898531ebe8e8b0953572a3d333f60f515a6e7d4196bf39",
+      "bytes": 48211,
+      "role": "original implementation; run.py supplies portable paths"
+    },
+    {
+      "source": "Lorenz/Ab_Lorenz_3.py",
+      "destination": "experiments/ablations/legacy/Ab_Lorenz_3.py",
+      "source_sha256": "3f4be563dbfa5cec39842cc9a74ef6390a73acd5eaec7964aad621444b90d495",
+      "destination_sha256": "3f4be563dbfa5cec39842cc9a74ef6390a73acd5eaec7964aad621444b90d495",
+      "bytes": 104067,
+      "role": "original implementation; run.py supplies portable paths"
+    },
+    {
+      "source": "Lorenz/Explicit40.py",
+      "destination": "experiments/ablations/legacy/Explicit40.py",
+      "source_sha256": "13d701bce4c2d84ce6ed07f7fc3d037081d75bf112d2e561235d33ddd95342d3",
+      "destination_sha256": "13d701bce4c2d84ce6ed07f7fc3d037081d75bf112d2e561235d33ddd95342d3",
+      "bytes": 46905,
+      "role": "original implementation; run.py supplies portable paths"
+    },
+    {
+      "source": "Lorenz/recurrence_clock_ablation.py",
+      "destination": "experiments/ablations/legacy/recurrence_clock_ablation.py",
+      "source_sha256": "e453b49ec8ea611fecbc363031d501576c15844c438f76fdce920e0f1b6d0854",
+      "destination_sha256": "e453b49ec8ea611fecbc363031d501576c15844c438f76fdce920e0f1b6d0854",
+      "bytes": 55071,
+      "role": "original implementation; run.py supplies portable paths"
+    },
+    {
+      "source": "Lorenz/evaluate_clock_robustness_results.py",
+      "destination": "experiments/ablations/legacy/evaluate_clock_robustness_results.py",
+      "source_sha256": "fa76d3b9fc148ccb77c1201ea64eb048d83b260741db25f38c433c5dd141a456",
+      "destination_sha256": "fa76d3b9fc148ccb77c1201ea64eb048d83b260741db25f38c433c5dd141a456",
+      "bytes": 27682,
+      "role": "original implementation; run.py supplies portable paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_train_eval_v2.py",
+      "destination": "experiments/ablations/legacy/implicit_poincare_multiseed_train_eval_v2.py",
+      "source_sha256": "09fda0734b61964880473dde0b61c8eacb80d5f6b2baf375abc690470c229c2b",
+      "destination_sha256": "09fda0734b61964880473dde0b61c8eacb80d5f6b2baf375abc690470c229c2b",
+      "bytes": 59309,
+      "role": "original implementation; run.py supplies portable paths"
+    },
+    {
+      "source": "Lorenz/recurrence_section_diagnostics.py",
+      "destination": "experiments/ablations/legacy/recurrence_section_diagnostics.py",
+      "source_sha256": "1ea1e363979293e988d10619cf682f84ac0b9cf634e20eefb402740a38912106",
+      "destination_sha256": "1ea1e363979293e988d10619cf682f84ac0b9cf634e20eefb402740a38912106",
+      "bytes": 44020,
+      "role": "original implementation; run.py supplies portable paths"
+    },
+    {
+      "source": "Lorenz/rebuttal_mechanism_utils.py",
+      "destination": "experiments/ablations/legacy/rebuttal_mechanism_utils.py",
+      "source_sha256": "caa9ed361708286a8f4cafccecae0ff6ae44a7b9baf9a5ceee3cb9a42bf312d1",
+      "destination_sha256": "caa9ed361708286a8f4cafccecae0ff6ae44a7b9baf9a5ceee3cb9a42bf312d1",
+      "bytes": 12674,
+      "role": "original implementation; run.py supplies portable paths"
+    },
+    {
+      "source": "Lorenz/rebuttal_section_utils.py",
+      "destination": "experiments/ablations/legacy/rebuttal_section_utils.py",
+      "source_sha256": "9bdfd37808178cd50d46ecac05be1e05f0106de32dc5a514002aa0c91edbb549",
+      "destination_sha256": "9bdfd37808178cd50d46ecac05be1e05f0106de32dc5a514002aa0c91edbb549",
+      "bytes": 11260,
+      "role": "original implementation; run.py supplies portable paths"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_K/lorenz_K_ablation_eval_seed1000.csv",
+      "destination": "reference/ablations/lorenz_ablation_K/lorenz_K_ablation_eval_seed1000.csv",
+      "source_sha256": "0280f1d393507f8830ba75047e49a1f99e0fb6e9a940163821057ea248137be2",
+      "destination_sha256": "0280f1d393507f8830ba75047e49a1f99e0fb6e9a940163821057ea248137be2",
+      "bytes": 2741,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_section/lorenz_section_ablation_eval_seed1000.csv",
+      "destination": "reference/ablations/lorenz_ablation_section/lorenz_section_ablation_eval_seed1000.csv",
+      "source_sha256": "31b6fda680666d805b3275a0f83f43d270b62bdee9105f32102a28430d2c155e",
+      "destination_sha256": "31b6fda680666d805b3275a0f83f43d270b62bdee9105f32102a28430d2c155e",
+      "bytes": 10130,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_loss_terms/loss_term_ablation_summary_TCM_seed1000.csv",
+      "destination": "reference/ablations/lorenz_ablation_loss_terms/loss_term_ablation_summary_TCM_seed1000.csv",
+      "source_sha256": "51f6c910793a4afaceb77aec519ba2c585d1cc3a669b30d2b4a6eb986f62ee36",
+      "destination_sha256": "0c5a23fe361d50b3b75016353428311ba2d15b98b8d67aca686bbb55e5ede3c8",
+      "bytes": 1325,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_loss_terms/loss_term_ablation_prediction_metrics_TCM_seed1000.csv",
+      "destination": "reference/ablations/lorenz_ablation_loss_terms/loss_term_ablation_prediction_metrics_TCM_seed1000.csv",
+      "source_sha256": "04f4749c37255a03d9350e7ba55a0158de579575b602cef546aa801e32e3214e",
+      "destination_sha256": "f01fd85b41d194f1ed163e0e18052ab75e4b4ce41d544478c5500ed6d8ea9060",
+      "bytes": 31971,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_loss_terms/loss_term_ablation_drtd_TCM_seed1000.csv",
+      "destination": "reference/ablations/lorenz_ablation_loss_terms/loss_term_ablation_drtd_TCM_seed1000.csv",
+      "source_sha256": "da2645b3d024e4de01a15fc9eb8b0a7de02afe0a399786bb8316395597b72d90",
+      "destination_sha256": "f439ea652cfaf298b7cac825ce05e7ecc1613d23f4ca6532b75f0a33b7b87c44",
+      "bytes": 2997,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/lorenz_clock_robustness/clockrobust_summary_seed1000.csv",
+      "destination": "reference/ablations/lorenz_clock_robustness/clockrobust_summary_seed1000.csv",
+      "source_sha256": "313e2076426d6bdb78c7d002cb111eef2e9d42840a7b3c532c5127f4525878de",
+      "destination_sha256": "863a98c3e08b4734e986061f8af3cfb87cbe645dbbe723a450243d5eb5c18202",
+      "bytes": 1094,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/lorenz_clock_robustness/eval_30start_metrics_20260504_111256/clock_robustness_eval_30starts.csv",
+      "destination": "reference/ablations/lorenz_clock_robustness/eval_30start_metrics_20260504_111256/clock_robustness_eval_30starts.csv",
+      "source_sha256": "a48de69e5d7c2e2d63ea4135642c53d8f02b9eb0e16f1203c9370c50dcfaa78a",
+      "destination_sha256": "9b3b020a2e7db2ec1347865b44cc0acb1d715a3d021b256db35701f431ea6d46",
+      "bytes": 2541,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/section_diagnostics/section_diagnostics_aggregate.csv",
+      "destination": "reference/ablations/section_diagnostics/section_diagnostics_aggregate.csv",
+      "source_sha256": "153ff216c35660d34ea1e03812d031b3030cff495806ccae253cb383913b5d71",
+      "destination_sha256": "d4077368944425416dd2792661b5d9315e5b596371dbff0bad7a8b05a539dd66",
+      "bytes": 14547,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/section_diagnostics/section_diagnostics_per_seed.csv",
+      "destination": "reference/ablations/section_diagnostics/section_diagnostics_per_seed.csv",
+      "source_sha256": "9eb429aae64523efb2115e1c595858234db0b0133b15831c8d23732cc89e8f84",
+      "destination_sha256": "881479557624b82297eb935284804f7ee4c1bb1329a3471032bc6a62f0565764",
+      "bytes": 41621,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/1-step MSE/PRIME_vs_all_FixedTime_K_results.csv",
+      "destination": "reference/ablations/PRIME_vs_all_FixedTime_K_results.csv",
+      "source_sha256": "7c8b77607756ea4d6c10a885baf5ad37c704367f1932a308abc4880bc0f5e35e",
+      "destination_sha256": "7c8b77607756ea4d6c10a885baf5ad37c704367f1932a308abc4880bc0f5e35e",
+      "bytes": 1707,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/1-step MSE/PRIME_SequentialK_EmpiricalVariableK_W2_PSD.csv",
+      "destination": "reference/ablations/PRIME_SequentialK_EmpiricalVariableK_W2_PSD.csv",
+      "source_sha256": "529fe8d7255d32adcd3e75f82596b09850ef017eac023a7f23b0bf4c3e3254d7",
+      "destination_sha256": "529fe8d7255d32adcd3e75f82596b09850ef017eac023a7f23b0bf4c3e3254d7",
+      "bytes": 193,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_DIMWarmup_then_PRIMEOnly/BEST_PRIME_Attractor_W2_all_seeds.csv",
+      "destination": "reference/ablations/Ablation_DIMWarmup_then_PRIMEOnly/BEST_PRIME_Attractor_W2_all_seeds.csv",
+      "source_sha256": "efab1c3ce389da0b38e1b77892a295f0fe5ab3c11b660a3fd987224a02761db0",
+      "destination_sha256": "2788836f16c265884fa506c31d25a0d79fcc875106bece942f7d231ac47226bd",
+      "bytes": 780,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/1-step MSE/PRIME_ImplicitBEST_W2_evaluation/PRIME_ImplicitBEST_W2_per_seed.csv",
+      "destination": "reference/ablations/PRIME_ImplicitBEST_W2_evaluation/PRIME_ImplicitBEST_W2_per_seed.csv",
+      "source_sha256": "794735aae21957967083cc5c2143c60190b7501c872c0c705f766a4c77b15ef9",
+      "destination_sha256": "1f6ebd38f5cdf05c474db0d4554b3e7166e5d99b3578ea18153858747d756980",
+      "bytes": 475,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/1-step MSE/DIM_MSE_W2_evaluation/DIM_MSE_Attractor_W2_per_seed.csv",
+      "destination": "reference/ablations/DIM_MSE_W2_evaluation/DIM_MSE_Attractor_W2_per_seed.csv",
+      "source_sha256": "793d9a17b47ab615afd986c5f9d179000207b02d9832ce89a5b9dd9c359a1c16",
+      "destination_sha256": "295e2737eba53603600486cf7d14d887ca03a321f4b53a61b5ec71c455092c8f",
+      "bytes": 492,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/evaluation_against_PRIME/graph_measure_ablation_per_seed.csv",
+      "destination": "reference/ablations/Ablation_GraphMeasureSpecificity/evaluation_against_PRIME/graph_measure_ablation_per_seed.csv",
+      "source_sha256": "97a28f12631f76939eff8d143c7acea9c2c85482b287da62cf9729bad9ce4171",
+      "destination_sha256": "0756df6314bed61d54db59eb6f532609f18a99d7d8a1646e72389e3e833fbf2d",
+      "bytes": 3653,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/evaluation_against_PRIME/graph_measure_ablation_summary.csv",
+      "destination": "reference/ablations/Ablation_GraphMeasureSpecificity/evaluation_against_PRIME/graph_measure_ablation_summary.csv",
+      "source_sha256": "4c1ef19b0f1ae3a84a5d39ffb9b19abeb1f65aa1dd70b33a1ea43b5183cfb28f",
+      "destination_sha256": "4c1ef19b0f1ae3a84a5d39ffb9b19abeb1f65aa1dd70b33a1ea43b5183cfb28f",
+      "bytes": 464,
+      "role": "reference; absolute paths normalized to source-relative Lorenz paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.10/ablation_20260430_122412/per_seed_results.csv",
+      "destination": "reference/ablations/speed_threshold/q_0.10/per_seed_results.csv",
+      "source_sha256": "2533fb133c20ef858cc7cf132813a7dfeafc73c4d375999b4f93f42a3a09f0fd",
+      "destination_sha256": "315c42f5e9ea0d008dd7156b58cd6915551a2c6c2e2e232629bdb4529ac18e81",
+      "bytes": 6982,
+      "role": "reference; source-relative paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.10/ablation_20260430_122412/aggregate_over_training_seeds.csv",
+      "destination": "reference/ablations/speed_threshold/q_0.10/aggregate_over_training_seeds.csv",
+      "source_sha256": "792179d20da6f3cff83e6f27aa3339d8cd6988d196920f92dc47cb0c29fd3f79",
+      "destination_sha256": "aa336ff739ba4d2d5aff910b5aca7d77f0ef5da9ac8977af3ed3589badad670e",
+      "bytes": 531,
+      "role": "reference; source-relative paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.10/ablation_20260430_122412/base_config.json",
+      "destination": "reference/ablations/speed_threshold/q_0.10/base_config.json",
+      "source_sha256": "783af54231c36b9fdd76ad1a4b73ae346a2416a3bea5f622e3b520bc0b44acd3",
+      "destination_sha256": "783af54231c36b9fdd76ad1a4b73ae346a2416a3bea5f622e3b520bc0b44acd3",
+      "bytes": 1119,
+      "role": "reference; source-relative paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.20/ablation_20260430_122412/per_seed_results.csv",
+      "destination": "reference/ablations/speed_threshold/q_0.20/per_seed_results.csv",
+      "source_sha256": "126692bde47a2286d18ff0accc40fcd206c1db31d6ab13de397bd4e421f33a17",
+      "destination_sha256": "1f41d54fa60bcdddbb4e3b5abd7ad8f7d64fd5274869b571097a1b321e130e52",
+      "bytes": 7019,
+      "role": "reference; source-relative paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.20/ablation_20260430_122412/aggregate_over_training_seeds.csv",
+      "destination": "reference/ablations/speed_threshold/q_0.20/aggregate_over_training_seeds.csv",
+      "source_sha256": "59b16b59abecd954d9855a8904febddeb9e1161f342439eee41df8ed08ed701a",
+      "destination_sha256": "6ba8d5279452eec5bb7ae24fd14c85920f4224cf61d98447c70dea04d99602f9",
+      "bytes": 529,
+      "role": "reference; source-relative paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.20/ablation_20260430_122412/base_config.json",
+      "destination": "reference/ablations/speed_threshold/q_0.20/base_config.json",
+      "source_sha256": "b13f90e558efc48ee34877f8cd6a7c37570e36dc87911144f6d3c4a5d17ba93e",
+      "destination_sha256": "b13f90e558efc48ee34877f8cd6a7c37570e36dc87911144f6d3c4a5d17ba93e",
+      "bytes": 1119,
+      "role": "reference; source-relative paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.30/ablation_20260430_122412/per_seed_results.csv",
+      "destination": "reference/ablations/speed_threshold/q_0.30/per_seed_results.csv",
+      "source_sha256": "3d9ab9defd6585ede0e24ddd40be2fc096e1fbeb75462dfd55ccedd3e0d17116",
+      "destination_sha256": "e3ad25fce324a337a40f3fedb55ae918f3aa53b58425bea1758404b9193ed6be",
+      "bytes": 6961,
+      "role": "reference; source-relative paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.30/ablation_20260430_122412/aggregate_over_training_seeds.csv",
+      "destination": "reference/ablations/speed_threshold/q_0.30/aggregate_over_training_seeds.csv",
+      "source_sha256": "3bdb258143cc9d926b7cfdf04edebe7804cfe5db02e0e4e41eb5256388a1e8b0",
+      "destination_sha256": "9bc3806de8057905984d5f2a9c68f5d87b34f9579eb613398fa9948961d28140",
+      "bytes": 530,
+      "role": "reference; source-relative paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.30/ablation_20260430_122412/base_config.json",
+      "destination": "reference/ablations/speed_threshold/q_0.30/base_config.json",
+      "source_sha256": "6ba03c5fcebc91def35fe05a311d4bd874d9a420746122676d25dab162332bbd",
+      "destination_sha256": "6ba03c5fcebc91def35fe05a311d4bd874d9a420746122676d25dab162332bbd",
+      "bytes": 1119,
+      "role": "reference; source-relative paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.40/ablation_20260430_122412/per_seed_results.csv",
+      "destination": "reference/ablations/speed_threshold/q_0.40/per_seed_results.csv",
+      "source_sha256": "4195dbddb57512369b08f0715df5e389c3dc47fe0cd69b861e8fee2dd6551638",
+      "destination_sha256": "3f99e2236c1b227ab9a7b03d6c184d000cd9d5fa29170cd435dd26d2cefba751",
+      "bytes": 6940,
+      "role": "reference; source-relative paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.40/ablation_20260430_122412/aggregate_over_training_seeds.csv",
+      "destination": "reference/ablations/speed_threshold/q_0.40/aggregate_over_training_seeds.csv",
+      "source_sha256": "aea3c1a9ec2d7a8e7c392c31d0f3914ab2e95a9e413c9695b424072e96a3b3a2",
+      "destination_sha256": "be0d94258c4707cfcc30c06e0fc23a8b4c69a14b858630bcbcc57ce6cb229f1e",
+      "bytes": 529,
+      "role": "reference; source-relative paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.40/ablation_20260430_122412/base_config.json",
+      "destination": "reference/ablations/speed_threshold/q_0.40/base_config.json",
+      "source_sha256": "8a147460e36263eb73c3f09efba1422d970456891748dff2bd7e6624c56eaca2",
+      "destination_sha256": "8a147460e36263eb73c3f09efba1422d970456891748dff2bd7e6624c56eaca2",
+      "bytes": 1119,
+      "role": "reference; source-relative paths"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_K/correct_seed1000/Implicit_K_correct_seed1000_SELECTED_20260427_133250.p",
+      "destination": "checkpoints/ablations/lorenz_ablation_K/correct_seed1000/Implicit_K_correct_seed1000_SELECTED_20260427_133250.p",
+      "source_sha256": "5f3aaf53199c65105a0daaa0ebf11650b76ccf557f463bedb272a0f965d954a6",
+      "destination_sha256": "5f3aaf53199c65105a0daaa0ebf11650b76ccf557f463bedb272a0f965d954a6",
+      "bytes": 236973,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_K/dim_only_seed1000/Implicit_K_dim_only_seed1000_SELECTED_20260427_130100.p",
+      "destination": "checkpoints/ablations/lorenz_ablation_K/dim_only_seed1000/Implicit_K_dim_only_seed1000_SELECTED_20260427_130100.p",
+      "source_sha256": "a6293b2a6633b98d794926518c389e7cea707712150c408c90bdc76c9a8a4b8d",
+      "destination_sha256": "a6293b2a6633b98d794926518c389e7cea707712150c408c90bdc76c9a8a4b8d",
+      "bytes": 236973,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_K/fixed_seed1000/Implicit_K_fixed_seed1000_SELECTED_20260427_131054.p",
+      "destination": "checkpoints/ablations/lorenz_ablation_K/fixed_seed1000/Implicit_K_fixed_seed1000_SELECTED_20260427_131054.p",
+      "source_sha256": "b22342d40765e85d6017099114f238685a5fa515087e57889076c262ff5403da",
+      "destination_sha256": "b22342d40765e85d6017099114f238685a5fa515087e57889076c262ff5403da",
+      "bytes": 236967,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_K/shuffled_seed1000/Implicit_K_shuffled_seed1000_SELECTED_20260427_132158.p",
+      "destination": "checkpoints/ablations/lorenz_ablation_K/shuffled_seed1000/Implicit_K_shuffled_seed1000_SELECTED_20260427_132158.p",
+      "source_sha256": "4d57c0dd92a384d6baaf8ebb0be18f0e6f55176006a35b6253e399e4db5cc9e6",
+      "destination_sha256": "4d57c0dd92a384d6baaf8ebb0be18f0e6f55176006a35b6253e399e4db5cc9e6",
+      "bytes": 236976,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_section/dim_only_seed1000/Section_dim_only_seed1000_SELECTED_20260427_152438.p",
+      "destination": "checkpoints/ablations/lorenz_ablation_section/dim_only_seed1000/Section_dim_only_seed1000_SELECTED_20260427_152438.p",
+      "source_sha256": "635316a2951139325d2cfb5269fd89a59a63e2625f438df5ae1cfeed778cd478",
+      "destination_sha256": "635316a2951139325d2cfb5269fd89a59a63e2625f438df5ae1cfeed778cd478",
+      "bytes": 212678,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_section/exact_z40_band_seed1000/Section_exact_z40_band_seed1000_SELECTED_20260427_191155.p",
+      "destination": "checkpoints/ablations/lorenz_ablation_section/exact_z40_band_seed1000/Section_exact_z40_band_seed1000_SELECTED_20260427_191155.p",
+      "source_sha256": "e3a1ae6be9fb785e06f39717dfde2005d63cc6f05f68ccb3d2ebfbe300f5e905",
+      "destination_sha256": "e3a1ae6be9fb785e06f39717dfde2005d63cc6f05f68ccb3d2ebfbe300f5e905",
+      "bytes": 139088,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_section/implicit_seed1000/Section_implicit_seed1000_SELECTED_20260427_153228.p",
+      "destination": "checkpoints/ablations/lorenz_ablation_section/implicit_seed1000/Section_implicit_seed1000_SELECTED_20260427_153228.p",
+      "source_sha256": "dc2c495cfe679065cfae53f4fa852741d6f3aaec3c3a4a9886183c3c6d85bf85",
+      "destination_sha256": "dc2c495cfe679065cfae53f4fa852741d6f3aaec3c3a4a9886183c3c6d85bf85",
+      "bytes": 138742,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_section/random_hits_seed1000/Section_random_hits_seed1000_SELECTED_20260427_155451.p",
+      "destination": "checkpoints/ablations/lorenz_ablation_section/random_hits_seed1000/Section_random_hits_seed1000_SELECTED_20260427_155451.p",
+      "source_sha256": "195d1d9edbb0c12d99784150191e94656e5e927f42949875d8452a9b561d62b4",
+      "destination_sha256": "195d1d9edbb0c12d99784150191e94656e5e927f42949875d8452a9b561d62b4",
+      "bytes": 138198,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_loss_terms/dim_only_seed1000/LossTerm_dim_only_seed1000_SELECTED.p",
+      "destination": "checkpoints/ablations/lorenz_ablation_loss_terms/dim_only_seed1000/LossTerm_dim_only_seed1000_SELECTED.p",
+      "source_sha256": "2d2122895f513f3bd13ef1e78f70a8ea0e3d09bf31ba33e00cf278b8745634e9",
+      "destination_sha256": "2d2122895f513f3bd13ef1e78f70a8ea0e3d09bf31ba33e00cf278b8745634e9",
+      "bytes": 309116,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_loss_terms/full_seed1000/LossTerm_full_seed1000_SELECTED.p",
+      "destination": "checkpoints/ablations/lorenz_ablation_loss_terms/full_seed1000/LossTerm_full_seed1000_SELECTED.p",
+      "source_sha256": "1b98785c5f9c02d67f89f3606e398ac0590f2ae7f4b6d2a44fe46e3f5de4f750",
+      "destination_sha256": "1b98785c5f9c02d67f89f3606e398ac0590f2ae7f4b6d2a44fe46e3f5de4f750",
+      "bytes": 171204,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_loss_terms/graph_only_seed1000/LossTerm_graph_only_seed1000_SELECTED.p",
+      "destination": "checkpoints/ablations/lorenz_ablation_loss_terms/graph_only_seed1000/LossTerm_graph_only_seed1000_SELECTED.p",
+      "source_sha256": "447b10f812316a577e3d908ed0c22e7a26f35bba990bd5099e0d2689b772bd23",
+      "destination_sha256": "447b10f812316a577e3d908ed0c22e7a26f35bba990bd5099e0d2689b772bd23",
+      "bytes": 171224,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_loss_terms/marginals_only_seed1000/LossTerm_marginals_only_seed1000_SELECTED.p",
+      "destination": "checkpoints/ablations/lorenz_ablation_loss_terms/marginals_only_seed1000/LossTerm_marginals_only_seed1000_SELECTED.p",
+      "source_sha256": "df7eee6b82e68b83d85bb591f2485dab391468bec80346c4ac3347801f7983d1",
+      "destination_sha256": "df7eee6b82e68b83d85bb591f2485dab391468bec80346c4ac3347801f7983d1",
+      "bytes": 171244,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_loss_terms/no_source_marginal_seed1000/LossTerm_no_source_marginal_seed1000_SELECTED.p",
+      "destination": "checkpoints/ablations/lorenz_ablation_loss_terms/no_source_marginal_seed1000/LossTerm_no_source_marginal_seed1000_SELECTED.p",
+      "source_sha256": "4d4f2680b356ebbb474fefa8edce05b68128e17bfed7d2c8df41f701c9f35df4",
+      "destination_sha256": "4d4f2680b356ebbb474fefa8edce05b68128e17bfed7d2c8df41f701c9f35df4",
+      "bytes": 171258,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_ablation_loss_terms/no_target_marginal_seed1000/LossTerm_no_target_marginal_seed1000_SELECTED.p",
+      "destination": "checkpoints/ablations/lorenz_ablation_loss_terms/no_target_marginal_seed1000/LossTerm_no_target_marginal_seed1000_SELECTED.p",
+      "source_sha256": "74232e2e47758476885f2be5a36ea3d1f4bad353b825b62bd444b6d0711972b3",
+      "destination_sha256": "74232e2e47758476885f2be5a36ea3d1f4bad353b825b62bd444b6d0711972b3",
+      "bytes": 171258,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_clock_robustness/dim_only_seed1000/ClockRobust_dim_only_seed1000_SELECTED_20260504_102919.p",
+      "destination": "checkpoints/ablations/lorenz_clock_robustness/dim_only_seed1000/ClockRobust_dim_only_seed1000_SELECTED_20260504_102919.p",
+      "source_sha256": "89bec12cd8df05d91fb95f0f9557dfd2455a4cff7d88556548d2c5f9284a8afc",
+      "destination_sha256": "89bec12cd8df05d91fb95f0f9557dfd2455a4cff7d88556548d2c5f9284a8afc",
+      "bytes": 312035,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_clock_robustness/exact_k_seed1000/ClockRobust_exact_k_seed1000_SELECTED_20260504_103939.p",
+      "destination": "checkpoints/ablations/lorenz_clock_robustness/exact_k_seed1000/ClockRobust_exact_k_seed1000_SELECTED_20260504_103939.p",
+      "source_sha256": "6b06e244ec3e501a4c9fc449950e6641897631995a45872614f7e4b8cfd7acdc",
+      "destination_sha256": "6b06e244ec3e501a4c9fc449950e6641897631995a45872614f7e4b8cfd7acdc",
+      "bytes": 174118,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_clock_robustness/jitter_k_10_seed1000/ClockRobust_jitter_k_10_seed1000_SELECTED_20260504_104953.p",
+      "destination": "checkpoints/ablations/lorenz_clock_robustness/jitter_k_10_seed1000/ClockRobust_jitter_k_10_seed1000_SELECTED_20260504_104953.p",
+      "source_sha256": "3d363155da37bad813a21c7cb5a740c6ad4df41ef5d77b4d237beb84a92fc97a",
+      "destination_sha256": "3d363155da37bad813a21c7cb5a740c6ad4df41ef5d77b4d237beb84a92fc97a",
+      "bytes": 174138,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/lorenz_clock_robustness/jitter_k_20_seed1000/ClockRobust_jitter_k_20_seed1000_SELECTED_20260504_110028.p",
+      "destination": "checkpoints/ablations/lorenz_clock_robustness/jitter_k_20_seed1000/ClockRobust_jitter_k_20_seed1000_SELECTED_20260504_110028.p",
+      "source_sha256": "6d7008e3ba36a85b7cc4f28aaa6f176a0df3d16ca2416e0545686d3655d69137",
+      "destination_sha256": "6d7008e3ba36a85b7cc4f28aaa6f176a0df3d16ca2416e0545686d3655d69137",
+      "bytes": 174138,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_DIMWarmup_then_PRIMEOnly/seed_1000/DIMWarmup_PRIMEOnly_seed1000_BEST_PRIME_20260802_033918.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_DIMWarmup_then_PRIMEOnly/seed_1000/DIMWarmup_PRIMEOnly_seed1000_BEST_PRIME_20260802_033918.p",
+      "source_sha256": "cdb1adb7dd4b909afaaabe725103762cdade1cb9d159ac731ebc4b77f08924be",
+      "destination_sha256": "cdb1adb7dd4b909afaaabe725103762cdade1cb9d159ac731ebc4b77f08924be",
+      "bytes": 445947,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_DIMWarmup_then_PRIMEOnly/seed_123/DIMWarmup_PRIMEOnly_seed123_BEST_PRIME_20260802_015558.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_DIMWarmup_then_PRIMEOnly/seed_123/DIMWarmup_PRIMEOnly_seed123_BEST_PRIME_20260802_015558.p",
+      "source_sha256": "a848d702d3f541cce20d26e6ccba2b51cfe7a227afb2aaa6a1a8b26ee857eb73",
+      "destination_sha256": "a848d702d3f541cce20d26e6ccba2b51cfe7a227afb2aaa6a1a8b26ee857eb73",
+      "bytes": 445922,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_DIMWarmup_then_PRIMEOnly/seed_123456/DIMWarmup_PRIMEOnly_seed123456_BEST_PRIME_20260802_024914.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_DIMWarmup_then_PRIMEOnly/seed_123456/DIMWarmup_PRIMEOnly_seed123456_BEST_PRIME_20260802_024914.p",
+      "source_sha256": "bd256143da232a8c723a0dd90f0df1793c47266aab3373e5201f8901081cfad7",
+      "destination_sha256": "bd256143da232a8c723a0dd90f0df1793c47266aab3373e5201f8901081cfad7",
+      "bytes": 445900,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_DIMWarmup_then_PRIMEOnly/seed_13532/DIMWarmup_PRIMEOnly_seed13532_BEST_PRIME_20260802_042904.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_DIMWarmup_then_PRIMEOnly/seed_13532/DIMWarmup_PRIMEOnly_seed13532_BEST_PRIME_20260802_042904.p",
+      "source_sha256": "2ae70c5bdb26c8a8353f820b4a89ce3da38ec38d9983b85c3ec2730bac7feae5",
+      "destination_sha256": "2ae70c5bdb26c8a8353f820b4a89ce3da38ec38d9983b85c3ec2730bac7feae5",
+      "bytes": 445922,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_DIMWarmup_then_PRIMEOnly/seed_33/DIMWarmup_PRIMEOnly_seed33_BEST_PRIME_20260802_010528.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_DIMWarmup_then_PRIMEOnly/seed_33/DIMWarmup_PRIMEOnly_seed33_BEST_PRIME_20260802_010528.p",
+      "source_sha256": "9b68df596d6b263ee4b5ffe8900b2a5b39277565a5ec49f3dd4bbdb57931e94f",
+      "destination_sha256": "9b68df596d6b263ee4b5ffe8900b2a5b39277565a5ec49f3dd4bbdb57931e94f",
+      "bytes": 445921,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_only/seed_1000/DIM_only_BEST_TOTAL_20260803_051016.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_only/seed_1000/DIM_only_BEST_TOTAL_20260803_051016.p",
+      "source_sha256": "4bd0410a5901f17cffe096ba903590e7c319b51767efbf13244c959fc71b26c9",
+      "destination_sha256": "4bd0410a5901f17cffe096ba903590e7c319b51767efbf13244c959fc71b26c9",
+      "bytes": 440761,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_only/seed_123/DIM_only_BEST_TOTAL_20260803_033808.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_only/seed_123/DIM_only_BEST_TOTAL_20260803_033808.p",
+      "source_sha256": "3bb2e65381b08f76993cab46da07f4b6675ef1a9ca3f4bf372da64087559d60c",
+      "destination_sha256": "3bb2e65381b08f76993cab46da07f4b6675ef1a9ca3f4bf372da64087559d60c",
+      "bytes": 440736,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_only/seed_123456/DIM_only_BEST_TOTAL_20260803_104237.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_only/seed_123456/DIM_only_BEST_TOTAL_20260803_104237.p",
+      "source_sha256": "5dffd4d8f1770191fdcdc9d1d3b7cde1d38edf4d0789a64790c83b975e053352",
+      "destination_sha256": "5dffd4d8f1770191fdcdc9d1d3b7cde1d38edf4d0789a64790c83b975e053352",
+      "bytes": 440699,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_only/seed_13532/DIM_only_BEST_TOTAL_20260803_064128.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_only/seed_13532/DIM_only_BEST_TOTAL_20260803_064128.p",
+      "source_sha256": "63e4aba5151b9a4893415fcbc8c3b8bd643dcd1eed0fb528edd6b094dc418ee7",
+      "destination_sha256": "63e4aba5151b9a4893415fcbc8c3b8bd643dcd1eed0fb528edd6b094dc418ee7",
+      "bytes": 440737,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_only/seed_33/DIM_only_BEST_TOTAL_20260803_020639.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_only/seed_33/DIM_only_BEST_TOTAL_20260803_020639.p",
+      "source_sha256": "c1f686fa44590692e17e1fefd17e0f9c8ba358112bf7b4f338cc92a39930ee4a",
+      "destination_sha256": "c1f686fa44590692e17e1fefd17e0f9c8ba358112bf7b4f338cc92a39930ee4a",
+      "bytes": 440736,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_1000/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_064046.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_1000/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_064046.p",
+      "source_sha256": "24a0ff9f05e64837fd443ee32a3ed04389a34db6c46e198ed3fbdb81ada77429",
+      "destination_sha256": "24a0ff9f05e64837fd443ee32a3ed04389a34db6c46e198ed3fbdb81ada77429",
+      "bytes": 440796,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_123/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_050934.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_123/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_050934.p",
+      "source_sha256": "77dadba610c6fede89f0b9fbe0e1531e7b6cc4f96fbc0a613714bf77b16da559",
+      "destination_sha256": "77dadba610c6fede89f0b9fbe0e1531e7b6cc4f96fbc0a613714bf77b16da559",
+      "bytes": 440771,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_123456/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_132913.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_123456/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_132913.p",
+      "source_sha256": "c621d0eb3f35f5a6168c318b15557ee96f880ca24ebc5ce28ae76d2858e05764",
+      "destination_sha256": "c621d0eb3f35f5a6168c318b15557ee96f880ca24ebc5ce28ae76d2858e05764",
+      "bytes": 440734,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_13532/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_104152.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_13532/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_104152.p",
+      "source_sha256": "699689a0054b9992dcaef24505aaaa613719cf02210825f273d95c79c5d3569d",
+      "destination_sha256": "699689a0054b9992dcaef24505aaaa613719cf02210825f273d95c79c5d3569d",
+      "bytes": 440756,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_33/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_033726.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_plus_pairMSE_recurrence_marginals/seed_33/DIM_plus_pairMSE_recurrence_marginals_BEST_TOTAL_20260803_033726.p",
+      "source_sha256": "e446cc26835f218e1aee4ff59a5c02f190470b64d216fed5d14b39559e406bec",
+      "destination_sha256": "e446cc26835f218e1aee4ff59a5c02f190470b64d216fed5d14b39559e406bec",
+      "bytes": 440771,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_1000/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_055525.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_1000/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_055525.p",
+      "source_sha256": "c081800b0663e66d4e8c69a5978bee78bb719cda38dbff0bb04fc1f6ad51c536",
+      "destination_sha256": "c081800b0663e66d4e8c69a5978bee78bb719cda38dbff0bb04fc1f6ad51c536",
+      "bytes": 440788,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_123/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_042347.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_123/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_042347.p",
+      "source_sha256": "976830346e0f0ba305ac480779a3d10b54fc77ec863c7b3891a3c6834968e15f",
+      "destination_sha256": "976830346e0f0ba305ac480779a3d10b54fc77ec863c7b3891a3c6834968e15f",
+      "bytes": 440763,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_123456/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_123813.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_123456/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_123813.p",
+      "source_sha256": "1412e612f258b6f9ecd9e792ed2e8f4a1124b1b6a144a2bbaae781c652c8eba0",
+      "destination_sha256": "1412e612f258b6f9ecd9e792ed2e8f4a1124b1b6a144a2bbaae781c652c8eba0",
+      "bytes": 440726,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_13532/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_072624.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_13532/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_072624.p",
+      "source_sha256": "4462712320d6f0988808980f174c9faedbcc2ae05b0c2cc4cb4024c00de7070b",
+      "destination_sha256": "4462712320d6f0988808980f174c9faedbcc2ae05b0c2cc4cb4024c00de7070b",
+      "bytes": 440764,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_33/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_025237.p",
+      "destination": "checkpoints/ablations/notebook/Ablation_GraphMeasureSpecificity/DIM_plus_recurrence_marginals/seed_33/DIM_plus_recurrence_marginals_BEST_TOTAL_20260803_025237.p",
+      "source_sha256": "721804c4c9802a41b1962ffd1fd48d36e3d3fd4815f69190efa1982b91cde8aa",
+      "destination_sha256": "721804c4c9802a41b1962ffd1fd48d36e3d3fd4815f69190efa1982b91cde8aa",
+      "bytes": 440763,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/FixedTime_seed123456_K3/FixedTime_K3_BEST.p",
+      "destination": "checkpoints/ablations/notebook/FixedTime_seed123456_K3/FixedTime_K3_BEST.p",
+      "source_sha256": "95f84837c917c4cb299d720cbcab83751b48634d1fd7b25e5f7dfafe8dd1bbc0",
+      "destination_sha256": "95f84837c917c4cb299d720cbcab83751b48634d1fd7b25e5f7dfafe8dd1bbc0",
+      "bytes": 417577,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/FixedTime_seed123456_K6/FixedTime_K6_BEST.p",
+      "destination": "checkpoints/ablations/notebook/FixedTime_seed123456_K6/FixedTime_K6_BEST.p",
+      "source_sha256": "1b6ceb3b23c5ebfc30d856b5fa3c25e3ac70fb74fe10535eac11bb7179ad5a69",
+      "destination_sha256": "1b6ceb3b23c5ebfc30d856b5fa3c25e3ac70fb74fe10535eac11bb7179ad5a69",
+      "bytes": 417577,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/FixedTime_seed123456_K9/FixedTime_K9_BEST.p",
+      "destination": "checkpoints/ablations/notebook/FixedTime_seed123456_K9/FixedTime_K9_BEST.p",
+      "source_sha256": "b07f9cb4b0f25ee75db8147126a3139241676522e9ce16e9bd23556fa3c62022",
+      "destination_sha256": "b07f9cb4b0f25ee75db8147126a3139241676522e9ce16e9bd23556fa3c62022",
+      "bytes": 417577,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/FixedTime_seed123456_K12/FixedTime_K12_BEST.p",
+      "destination": "checkpoints/ablations/notebook/FixedTime_seed123456_K12/FixedTime_K12_BEST.p",
+      "source_sha256": "4a728566d627d2aaf113e277c28312df92844b9642f119eed1caf47fa54a0f78",
+      "destination_sha256": "4a728566d627d2aaf113e277c28312df92844b9642f119eed1caf47fa54a0f78",
+      "bytes": 417577,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/OrdinaryStartSequentialEmpiricalK_seed123/OrdinaryStartSequentialEmpiricalK_BEST_20260728_012801.p",
+      "destination": "checkpoints/ablations/notebook/OrdinaryStartSequentialEmpiricalK_seed123/OrdinaryStartSequentialEmpiricalK_BEST_20260728_012801.p",
+      "source_sha256": "fc15919b9bd3381af2fe3b7c431b926fa47e75a4c9003763eeab220ce40b8605",
+      "destination_sha256": "fc15919b9bd3381af2fe3b7c431b926fa47e75a4c9003763eeab220ce40b8605",
+      "bytes": 600448,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/EmpiricalVariableLag_seed123456/EmpiricalVariableLag_BEST_20260726_235526.p",
+      "destination": "checkpoints/ablations/notebook/EmpiricalVariableLag_seed123456/EmpiricalVariableLag_BEST_20260726_235526.p",
+      "source_sha256": "38aa90e42b64bb7f2973e02f667f2ac7289cf83c8c6c875deee3771e61389bb5",
+      "destination_sha256": "38aa90e42b64bb7f2973e02f667f2ac7289cf83c8c6c875deee3771e61389bb5",
+      "bytes": 619070,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/1-step MSE/1-step MSE 123/Implicit_NoWarmUp_BEST.p",
+      "destination": "checkpoints/ablations/notebook/1-step MSE 123/Implicit_NoWarmUp_BEST.p",
+      "source_sha256": "2713fdc18aadadafdc204baa5d816352816b3d185214ba3e6850e24186ea27aa",
+      "destination_sha256": "2713fdc18aadadafdc204baa5d816352816b3d185214ba3e6850e24186ea27aa",
+      "bytes": 236178,
+      "role": "copy"
+    },
+    {
+      "source": "Lorenz/Ab_Lorenz_compare.ipynb",
+      "destination": "experiments/ablations/notebook_cells/schedule_eval.py",
+      "source_sha256": "6e5ddc322ccb02e09b21bc094fe8000a03724d5ea1f9029f800b4c30e28ddee3",
+      "destination_sha256": "1fe6b6f49bdb09c58a382104f63fa01657cad7f7f4da1add995b5b5a963e173f",
+      "bytes": 18778,
+      "role": "notebook cell 2 zero-based; source-cell sha256 877dd6b840b8d4b1ae7e7a049aa70c132c0797142b41bceae62af02e4d05a7a2"
+    },
+    {
+      "source": "Lorenz/Ab_Lorenz_compare.ipynb",
+      "destination": "experiments/ablations/notebook_cells/section_eval.py",
+      "source_sha256": "6e5ddc322ccb02e09b21bc094fe8000a03724d5ea1f9029f800b4c30e28ddee3",
+      "destination_sha256": "7b68d79720792173d30b5d8486830351dddf8b1d7639d9ac2ed465eaa651a604",
+      "bytes": 21582,
+      "role": "notebook cell 3 zero-based; source-cell sha256 24275519802e589f02369cfd40c83fe5e2e4fa0ddc361ff8ed7a67108ab01036"
+    },
+    {
+      "source": "Lorenz/plot_recurrence_section.ipynb",
+      "destination": "experiments/ablations/notebook_cells/loss_terms_eval.py",
+      "source_sha256": "40cdb1da069729b0a93d21fc41bff347b876198f50dc41668cbc6d92d1fe192d",
+      "destination_sha256": "52ff1999bb271f94cc5d90df872c630a528c8b89a9153688c6723ab58b08d6b3",
+      "bytes": 30510,
+      "role": "notebook cell 6 zero-based; source-cell sha256 58868cd58b26ee2dd4e34b3c9078241ad9ab8cc246b0491fc6ec459964b27665"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Lorenz.ipynb",
+      "destination": "experiments/ablations/notebook_cells/fixed_lag_train.py",
+      "source_sha256": "7ac462b2537f9496510ddf568e214e16386e513156ab06cfe6c50b12ddeb41c8",
+      "destination_sha256": "3e9e62d04d0466ef87f7d2702dfdc2e0cab47b101965ea919880e39cc8addfb4",
+      "bytes": 27658,
+      "role": "notebook cell 12 zero-based; source-cell sha256 9adac30f65289ea4c778a0561aba4df0540461b6d733b41d88badf13e10f34be"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Lorenz.ipynb",
+      "destination": "experiments/ablations/notebook_cells/sequential_lag_train.py",
+      "source_sha256": "7ac462b2537f9496510ddf568e214e16386e513156ab06cfe6c50b12ddeb41c8",
+      "destination_sha256": "f2f002a83286caf182690ff1552690b75bc3d76d95e257750d46d4edf3f7880c",
+      "bytes": 31735,
+      "role": "notebook cell 13 zero-based; source-cell sha256 287fa30f3f44ddf823dd2f1bcbf9c97b7d0a19ada1c6c73c5812e9c688aff951"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Lorenz.ipynb",
+      "destination": "experiments/ablations/notebook_cells/fixed_lag_eval.py",
+      "source_sha256": "7ac462b2537f9496510ddf568e214e16386e513156ab06cfe6c50b12ddeb41c8",
+      "destination_sha256": "fc691a8822234a6871193bb99abce98d2490a6ac84ffdb1d2d82fc005d552f74",
+      "bytes": 21008,
+      "role": "notebook cell 14 zero-based; source-cell sha256 28abc42211bff27875d01163a141a6169418f7707f2a12fb9f9a1d0855e5eb3f"
+    },
+    {
+      "source": "Lorenz/1-step MSE/Lorenz.ipynb",
+      "destination": "experiments/ablations/notebook_cells/variable_lag_eval.py",
+      "source_sha256": "7ac462b2537f9496510ddf568e214e16386e513156ab06cfe6c50b12ddeb41c8",
+      "destination_sha256": "9e634591cb54ad925f64359a9d58b3df8720b57050b173277070cb7228f06f80",
+      "bytes": 19238,
+      "role": "notebook cell 15 zero-based; source-cell sha256 d1d5a5688d61e89de149e8c781bfcabe39c794c5c728c4cc117a3b4ebb18c839"
+    },
+    {
+      "source": "Lorenz/1-step MSE/pP3L_Rebuttal.ipynb",
+      "destination": "experiments/ablations/notebook_cells/prime_only_train.py",
+      "source_sha256": "9cb919027fdc45a501bb414070cf00225159c687d04714c6b8dc2c5d316abe51",
+      "destination_sha256": "406d02f84d26f20cb763ae2619a736bd3bdcde7db586f9a925020115ebc33586",
+      "bytes": 43858,
+      "role": "notebook cell 0 zero-based; source-cell sha256 ffe99f0ceb013c872e699676861140c4b6fb11c7cb7e2a126963e1583701a030"
+    },
+    {
+      "source": "Lorenz/1-step MSE/pP3L_Rebuttal.ipynb",
+      "destination": "experiments/ablations/notebook_cells/prime_only_eval.py",
+      "source_sha256": "9cb919027fdc45a501bb414070cf00225159c687d04714c6b8dc2c5d316abe51",
+      "destination_sha256": "ed7cc0294841297e804b4a564483fbcdc0d36e6eb4778123330c8407cac07cb1",
+      "bytes": 17828,
+      "role": "notebook cell 1 zero-based; source-cell sha256 c1d866ccb037679accf5dede778e074250514b435e4f77b754e46a4f1725a586"
+    },
+    {
+      "source": "Lorenz/1-step MSE/pP3L_Rebuttal.ipynb",
+      "destination": "experiments/ablations/notebook_cells/prime_w2_eval.py",
+      "source_sha256": "9cb919027fdc45a501bb414070cf00225159c687d04714c6b8dc2c5d316abe51",
+      "destination_sha256": "00e42bc205db6dcaae1f57055eb8176ecac7d99f763b61c59a557d83dc337542",
+      "bytes": 19271,
+      "role": "notebook cell 9 zero-based; source-cell sha256 e5d4baad30f8e029a3ee2c4e330996b55eba475a6b1420834cdd64b18fed2918"
+    },
+    {
+      "source": "Lorenz/1-step MSE/pP3L_Rebuttal.ipynb",
+      "destination": "experiments/ablations/notebook_cells/dim_mse_w2_eval.py",
+      "source_sha256": "9cb919027fdc45a501bb414070cf00225159c687d04714c6b8dc2c5d316abe51",
+      "destination_sha256": "2b5ed5097a055a101afd80a2e0d8af0ce325293043bf63195104a7dd93d32ffa",
+      "bytes": 18689,
+      "role": "notebook cell 10 zero-based; source-cell sha256 7900d0a1a7ae1b1abffa7363f7565a16d2c661cf265c5ae32978eeb85215c9ff"
+    },
+    {
+      "source": "Lorenz/1-step MSE/graph_abalation.ipynb",
+      "destination": "experiments/ablations/notebook_cells/graph_specificity_train.py",
+      "source_sha256": "7c8e1c11c97f3f3820ac53caa9dd112308592a2c302587ec02950bebe2903123",
+      "destination_sha256": "a191728250a6996b317ab5a01edaa85fa2ccc2d4ad78ab937088fc6d10a790d8",
+      "bytes": 40822,
+      "role": "notebook cell 1 zero-based; source-cell sha256 1d225935a1dbadab0744de4bfde8c6334c03b1cfead0a267d221421942757f46"
+    },
+    {
+      "source": "Lorenz/1-step MSE/graph_abalation.ipynb",
+      "destination": "experiments/ablations/notebook_cells/graph_specificity_eval.py",
+      "source_sha256": "7c8e1c11c97f3f3820ac53caa9dd112308592a2c302587ec02950bebe2903123",
+      "destination_sha256": "81653cf470a6670e61c45e16189fd3ccd97e4ddbf07dd0e9619c3655c31d4339",
+      "bytes": 28052,
+      "role": "notebook cell 2 zero-based; source-cell sha256 637b305de931fed7c317f2a015bf4eacc790f6645629abb5709a6c9f16b687e5"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.10/ablation_20260430_122412/qspeed_0p10/seed_123/Implicit_BEST_TOTAL_20260430_130139.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.10/seed_123/Implicit_BEST_TOTAL_20260430_130139.p",
+      "source_sha256": "c5b566fa0e7838e86b4a72b88ac2285efb42dab3298d07b63baf37226c40da57",
+      "destination_sha256": "c5b566fa0e7838e86b4a72b88ac2285efb42dab3298d07b63baf37226c40da57",
+      "bytes": 250177,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.10/ablation_20260430_122412/qspeed_0p10/seed_2024/Implicit_BEST_TOTAL_20260430_144735.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.10/seed_2024/Implicit_BEST_TOTAL_20260430_144735.p",
+      "source_sha256": "fbe91b746f7d4ae5db71831f0148d0616066bf7c6e65e0a8ac4fe4f97e9147ce",
+      "destination_sha256": "fbe91b746f7d4ae5db71831f0148d0616066bf7c6e65e0a8ac4fe4f97e9147ce",
+      "bytes": 250227,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.10/ablation_20260430_122412/qspeed_0p10/seed_3407/Implicit_BEST_TOTAL_20260430_152204.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.10/seed_3407/Implicit_BEST_TOTAL_20260430_152204.p",
+      "source_sha256": "2e2ed544585a117478c16522f3efec03ff1c13a9be8bbbdd3a3c58805ec1d426",
+      "destination_sha256": "2e2ed544585a117478c16522f3efec03ff1c13a9be8bbbdd3a3c58805ec1d426",
+      "bytes": 250275,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.10/ablation_20260430_122412/qspeed_0p10/seed_456/Implicit_BEST_TOTAL_20260430_133754.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.10/seed_456/Implicit_BEST_TOTAL_20260430_133754.p",
+      "source_sha256": "72fc2a1ca1072927265cc51f1fb4a52595d3943f27a74c9cd95401e854a9c062",
+      "destination_sha256": "72fc2a1ca1072927265cc51f1fb4a52595d3943f27a74c9cd95401e854a9c062",
+      "bytes": 250250,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.10/ablation_20260430_122412/qspeed_0p10/seed_789/Implicit_BEST_TOTAL_20260430_141300.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.10/seed_789/Implicit_BEST_TOTAL_20260430_141300.p",
+      "source_sha256": "89c575f068af4a9994f43a806f49080707acb9a286bc36562dde574517f09d58",
+      "destination_sha256": "89c575f068af4a9994f43a806f49080707acb9a286bc36562dde574517f09d58",
+      "bytes": 250202,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.20/ablation_20260430_122412/qspeed_0p20/seed_123/Implicit_BEST_TOTAL_20260430_130116.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.20/seed_123/Implicit_BEST_TOTAL_20260430_130116.p",
+      "source_sha256": "3c93bbe0aa1e1450b13c3c941bd01d06bafa2be9fa25471f4dd7c367129082ea",
+      "destination_sha256": "3c93bbe0aa1e1450b13c3c941bd01d06bafa2be9fa25471f4dd7c367129082ea",
+      "bytes": 250153,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.20/ablation_20260430_122412/qspeed_0p20/seed_2024/Implicit_BEST_TOTAL_20260430_144609.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.20/seed_2024/Implicit_BEST_TOTAL_20260430_144609.p",
+      "source_sha256": "2169557884c0e71b01a6e9c41ed060e8021611e3cd45aa59483b3da5ea7d4b1c",
+      "destination_sha256": "2169557884c0e71b01a6e9c41ed060e8021611e3cd45aa59483b3da5ea7d4b1c",
+      "bytes": 250203,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.20/ablation_20260430_122412/qspeed_0p20/seed_3407/Implicit_BEST_TOTAL_20260430_151950.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.20/seed_3407/Implicit_BEST_TOTAL_20260430_151950.p",
+      "source_sha256": "f6ec837c704bc3f7a0f91fa10600799895a374dcc44e3962227e7d75e07b1c06",
+      "destination_sha256": "f6ec837c704bc3f7a0f91fa10600799895a374dcc44e3962227e7d75e07b1c06",
+      "bytes": 250251,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.20/ablation_20260430_122412/qspeed_0p20/seed_456/Implicit_BEST_TOTAL_20260430_133709.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.20/seed_456/Implicit_BEST_TOTAL_20260430_133709.p",
+      "source_sha256": "635954bb7401e204f40007962b9b371577006e451bd6947ba522c543388b04ad",
+      "destination_sha256": "635954bb7401e204f40007962b9b371577006e451bd6947ba522c543388b04ad",
+      "bytes": 250178,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.20/ablation_20260430_122412/qspeed_0p20/seed_789/Implicit_BEST_TOTAL_20260430_141112.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.20/seed_789/Implicit_BEST_TOTAL_20260430_141112.p",
+      "source_sha256": "914690595ee19d7f25c0aaf56867b8917c879bc20e97df6ab8a7b9f41f877807",
+      "destination_sha256": "914690595ee19d7f25c0aaf56867b8917c879bc20e97df6ab8a7b9f41f877807",
+      "bytes": 250250,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.30/ablation_20260430_122412/qspeed_0p30/seed_123/Implicit_BEST_TOTAL_20260430_130244.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.30/seed_123/Implicit_BEST_TOTAL_20260430_130244.p",
+      "source_sha256": "95a01d5f235273ab4d588dfb596deb512ff84d6c6ded49ac9add22a2c23918bd",
+      "destination_sha256": "95a01d5f235273ab4d588dfb596deb512ff84d6c6ded49ac9add22a2c23918bd",
+      "bytes": 250089,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.30/ablation_20260430_122412/qspeed_0p30/seed_2024/Implicit_BEST_TOTAL_20260430_145330.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.30/seed_2024/Implicit_BEST_TOTAL_20260430_145330.p",
+      "source_sha256": "173bf4d7d788598d0fd6bc1d122fa37cde0dabb60bbed5151367bffcb2fb6432",
+      "destination_sha256": "173bf4d7d788598d0fd6bc1d122fa37cde0dabb60bbed5151367bffcb2fb6432",
+      "bytes": 250091,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.30/ablation_20260430_122412/qspeed_0p30/seed_3407/Implicit_BEST_TOTAL_20260430_152949.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.30/seed_3407/Implicit_BEST_TOTAL_20260430_152949.p",
+      "source_sha256": "0123a0b2d81aa4c156b671b66d5fb5fd61f75b1bdaeca09b6f5b125cf7efeb3d",
+      "destination_sha256": "0123a0b2d81aa4c156b671b66d5fb5fd61f75b1bdaeca09b6f5b125cf7efeb3d",
+      "bytes": 250115,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.30/ablation_20260430_122412/qspeed_0p30/seed_456/Implicit_BEST_TOTAL_20260430_134012.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.30/seed_456/Implicit_BEST_TOTAL_20260430_134012.p",
+      "source_sha256": "4dcbf09c347ee3687517d0e61e1941270dffeeb11c7b4e5209359df20ec4b540",
+      "destination_sha256": "4dcbf09c347ee3687517d0e61e1941270dffeeb11c7b4e5209359df20ec4b540",
+      "bytes": 250114,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.30/ablation_20260430_122412/qspeed_0p30/seed_789/Implicit_BEST_TOTAL_20260430_141704.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.30/seed_789/Implicit_BEST_TOTAL_20260430_141704.p",
+      "source_sha256": "3cb2c466d4bcf03b567be9c7d7f81ac88f2ad868ffb3c776f30362e3c65a2e86",
+      "destination_sha256": "3cb2c466d4bcf03b567be9c7d7f81ac88f2ad868ffb3c776f30362e3c65a2e86",
+      "bytes": 250114,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.40/ablation_20260430_122412/qspeed_0p40/seed_123/Implicit_BEST_TOTAL_20260430_130136.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.40/seed_123/Implicit_BEST_TOTAL_20260430_130136.p",
+      "source_sha256": "ec4a26e9e77a3dfe52e020c72d5b0b5c9226eb7bab2cefb5f18014d370db46bb",
+      "destination_sha256": "ec4a26e9e77a3dfe52e020c72d5b0b5c9226eb7bab2cefb5f18014d370db46bb",
+      "bytes": 250201,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.40/ablation_20260430_122412/qspeed_0p40/seed_2024/Implicit_BEST_TOTAL_20260430_145632.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.40/seed_2024/Implicit_BEST_TOTAL_20260430_145632.p",
+      "source_sha256": "343b20c28347a44858782a49c0bcaae09a1dbb47b3edd372b88459144bfa021d",
+      "destination_sha256": "343b20c28347a44858782a49c0bcaae09a1dbb47b3edd372b88459144bfa021d",
+      "bytes": 250107,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.40/ablation_20260430_122412/qspeed_0p40/seed_3407/Implicit_BEST_TOTAL_20260430_153347.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.40/seed_3407/Implicit_BEST_TOTAL_20260430_153347.p",
+      "source_sha256": "c2785377852c325d3a96a82a290cc688e858b63b259cd1cd64ac513b2da6c08c",
+      "destination_sha256": "c2785377852c325d3a96a82a290cc688e858b63b259cd1cd64ac513b2da6c08c",
+      "bytes": 250107,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.40/ablation_20260430_122412/qspeed_0p40/seed_456/Implicit_BEST_TOTAL_20260430_134113.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.40/seed_456/Implicit_BEST_TOTAL_20260430_134113.p",
+      "source_sha256": "049c2c1e1cfbf13cf4a7329b04eba53ef31e3c611dcafe181e4af9eb224c36a0",
+      "destination_sha256": "049c2c1e1cfbf13cf4a7329b04eba53ef31e3c611dcafe181e4af9eb224c36a0",
+      "bytes": 250082,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/q_0.40/ablation_20260430_122412/qspeed_0p40/seed_789/Implicit_BEST_TOTAL_20260430_141855.p",
+      "destination": "checkpoints/ablations/speed_threshold/q_0.40/seed_789/Implicit_BEST_TOTAL_20260430_141855.p",
+      "source_sha256": "c4c859d68fc54a188798dd4e16bdd444d50ccac3c2be7c3b7bdf8270a2aac4f6",
+      "destination_sha256": "c4c859d68fc54a188798dd4e16bdd444d50ccac3c2be7c3b7bdf8270a2aac4f6",
+      "bytes": 250130,
+      "role": "selected BEST_TOTAL speed-threshold checkpoint"
+    },
+    {
+      "source": "Lorenz/parameter_abalation.py",
+      "destination": "experiments/ablations/legacy/parameter_abalation.py",
+      "source_sha256": "5271f55b852369eab873e86421ad86a9f209b4a04b6bb828e3cbbb4c7ba16030",
+      "destination_sha256": "5271f55b852369eab873e86421ad86a9f209b4a04b6bb828e3cbbb4c7ba16030",
+      "bytes": 19378,
+      "role": "original Table16 re-evaluation implementation"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/reeval_all_nmse_20260430_192740/per_rollout_all_nmse.csv",
+      "destination": "reference/ablations/speed_threshold/reevaluation/per_rollout_all_nmse.csv",
+      "source_sha256": "46163fea49dfd5c78330097efaf5eee6a46a62fca9be94df0778ed52895525b9",
+      "destination_sha256": "b9d8fb36cb047c7167c9e8216b0d01ddc3d99d45623b48200eeb0900690d1b99",
+      "bytes": 223976,
+      "role": "Table16 exact reference; source-relative paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/reeval_all_nmse_20260430_192740/per_seed_all_nmse.csv",
+      "destination": "reference/ablations/speed_threshold/reevaluation/per_seed_all_nmse.csv",
+      "source_sha256": "5e97ba481b187eb4c37b02a9eaebcfe9723ff935b0e9ee79eb46b912208c1174",
+      "destination_sha256": "af3f598fd5d560061a66d241d60843446fada0b6cc2f46d032903bc5dd3889c6",
+      "bytes": 18246,
+      "role": "Table16 exact reference; source-relative paths"
+    },
+    {
+      "source": "Lorenz/implicit_poincare_multiseed_parallel_20260430_122402/reeval_all_nmse_20260430_192740/aggregate_qspeed_all_nmse.csv",
+      "destination": "reference/ablations/speed_threshold/reevaluation/aggregate_qspeed_all_nmse.csv",
+      "source_sha256": "10cd8b13483be65851c072b19c745861daed496c50c3acc8882ac657afe53f16",
+      "destination_sha256": "10cd8b13483be65851c072b19c745861daed496c50c3acc8882ac657afe53f16",
+      "bytes": 3293,
+      "role": "Table16 exact reference; source-relative paths"
+    }
+  ],
+  "asset_bytes": 20546561,
+  "adaptation_notes": [
+    "Notebook terminal display replaces IPython Styler display.",
+    "Table5 section evaluator omits absent extra exact-Z40 checkpoint; preserves four paper rows.",
+    "Fixed-lag evaluation includes helper imports/functions from Lorenz.ipynb cell11.",
+    "Notebook input and output directories are separate.",
+    "No metric values in archived reference files changed."
+  ]
+}

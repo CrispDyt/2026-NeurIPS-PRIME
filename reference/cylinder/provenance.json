@@ -1,0 +1,188 @@
+[
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/flow_sensors.p",
+    "destination": "data/cylinder/flow_sensors.p",
+    "bytes": 2174685,
+    "sha256": "b9c4e3ec0dfd1ad9b633e32a394a2b439069b2350b47fac5ace199d8544d6262"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed100/PRIME.p",
+    "destination": "checkpoints/cylinder/Seed100/PRIME.p",
+    "bytes": 332920,
+    "sha256": "ad2a1dd064c725fd4f49773582b64cd7f97f3cdd4f1320e580e602a79339bb33"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed100/MSE.p",
+    "destination": "checkpoints/cylinder/Seed100/MSE.p",
+    "bytes": 50638,
+    "sha256": "8be791abc05214fad73ca3c4cc1b0ff44965cd9c3b37f6bea6c632371de5556f"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed100/DIM.p",
+    "destination": "checkpoints/cylinder/Seed100/DIM.p",
+    "bytes": 236614,
+    "sha256": "12a4ab167f84591eafaa02aa681b161280fe356d3583b6ea7e1c5deb4cf78e1b"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed100/DIM_MSE.p",
+    "destination": "checkpoints/cylinder/Seed100/DIM_MSE.p",
+    "bytes": 236614,
+    "sha256": "026d19d3e1733611619f0c8718b7872cbd1974659d6ed934abb4629fef6f4660"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed200/PRIME.p",
+    "destination": "checkpoints/cylinder/Seed200/PRIME.p",
+    "bytes": 332936,
+    "sha256": "c698fc11b0ed9aefcb27936858de640a9397abf10aa08b3fcd1539446a5aea51"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed200/MSE.p",
+    "destination": "checkpoints/cylinder/Seed200/MSE.p",
+    "bytes": 50638,
+    "sha256": "80fe1e92d81df2bcf081321f77faebfeeca4ed1a885bd7f0dc4995c2d2645f80"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed200/DIM.p",
+    "destination": "checkpoints/cylinder/Seed200/DIM.p",
+    "bytes": 236618,
+    "sha256": "fdabfb960665ec78589bc692953654ddb77d38267e3170662e587808ab16c9f5"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed200/DIM_MSE.p",
+    "destination": "checkpoints/cylinder/Seed200/DIM_MSE.p",
+    "bytes": 236618,
+    "sha256": "ca186c3c897f95e5eeaec024e5bd2ba0afbaf6f092b57da8ac5d1a205961ec75"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed13532/PRIME.p",
+    "destination": "checkpoints/cylinder/Seed13532/PRIME.p",
+    "bytes": 284777,
+    "sha256": "e4a40c8e2985448538465a5da41b424e4cc90b15644e531e07a50653fe19af06"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed13532/MSE.p",
+    "destination": "checkpoints/cylinder/Seed13532/MSE.p",
+    "bytes": 50638,
+    "sha256": "0614865fb21e0db2b1360fb403d605c774bb519b5819578cd4b57d1a76fe5a76"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed13532/DIM.p",
+    "destination": "checkpoints/cylinder/Seed13532/DIM.p",
+    "bytes": 236603,
+    "sha256": "e05b06be4f178d1281d6642afda81fc19257319bbe084b26653f73bcc540e26c"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed13532/DIM_MSE.p",
+    "destination": "checkpoints/cylinder/Seed13532/DIM_MSE.p",
+    "bytes": 236615,
+    "sha256": "29333b7e763efaac5432dc5815664ea63a5f84f6b02078c2a9ae2cab40fd3fda"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed123456/PRIME.p",
+    "destination": "checkpoints/cylinder/Seed123456/PRIME.p",
+    "bytes": 332939,
+    "sha256": "05d3b8728a479355f032531dc8a1bb0e8c09f6d6df9c3302deaf16870558b3e2"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed123456/MSE.p",
+    "destination": "checkpoints/cylinder/Seed123456/MSE.p",
+    "bytes": 50650,
+    "sha256": "6538a48aa6d4f36e35b481b31320c2f0864aeaaaa4d4e41812276271b0c78a79"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed123456/DIM.p",
+    "destination": "checkpoints/cylinder/Seed123456/DIM.p",
+    "bytes": 236631,
+    "sha256": "e8d7dcab96bae5890d726670b6d89c767c5e8deeb72cc444ba5303cda44f35ea"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed123456/DIM_MSE.p",
+    "destination": "checkpoints/cylinder/Seed123456/DIM_MSE.p",
+    "bytes": 236605,
+    "sha256": "2cd5f76b56febe34ce837991bab5fbf60701d43e784eba1cdc5914d69cf89bc0"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed123123123/PRIME.p",
+    "destination": "checkpoints/cylinder/Seed123123123/PRIME.p",
+    "bytes": 332939,
+    "sha256": "c478927a4ce353b963dfbe38930b734aebe5d9eb0538becc0700591b4cf5f40f"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed123123123/MSE.p",
+    "destination": "checkpoints/cylinder/Seed123123123/MSE.p",
+    "bytes": 50638,
+    "sha256": "f89a6b226880edca77493a0f4d162582a4ad95fd9095c3eebc9f56bbf4e798c1"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed123123123/DIM.p",
+    "destination": "checkpoints/cylinder/Seed123123123/DIM.p",
+    "bytes": 236605,
+    "sha256": "b2218a193440c5684b69d7957f7b5456da652c5570b5265db6f0386db5ff1103"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Seed123123123/DIM_MSE.p",
+    "destination": "checkpoints/cylinder/Seed123123123/DIM_MSE.p",
+    "bytes": 236605,
+    "sha256": "0fa668b4daa4d0f18a3908d195db3fea3f0635ec0c0f7f7762e19dc4504b5d5d"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/cfd_eval_5seeds_32starts_results/per_seed_poincare_DRTD_CFD.csv",
+    "destination": "reference/cylinder/per_seed_poincare_DRTD_CFD.csv",
+    "bytes": 8803,
+    "sha256": "a55f64b7a957679929dcff4410fef499abc65301fa246e8026f3fdc55c73eb40"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/cfd_eval_5seeds_32starts_results/summary_poincare_DRTD_CFD.csv",
+    "destination": "reference/cylinder/summary_poincare_DRTD_CFD.csv",
+    "bytes": 3484,
+    "sha256": "6e4b91812328af7e67497430864113d11130496643292508ba42d71709a964ce"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/cfd_eval_5seeds_32starts_results/summary_prediction_metrics_CFD.csv",
+    "destination": "reference/cylinder/summary_prediction_metrics_CFD.csv",
+    "bytes": 1958,
+    "sha256": "92e3ca7c4c26e715bfe1892070817672968b1a3b2822a3bfc67f4ca5b6fe4ef0"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/cfd_eval_5seeds_32starts_results/per_rollout_prediction_metrics_CFD.csv",
+    "destination": "reference/cylinder/per_rollout_prediction_metrics_CFD.csv",
+    "bytes": 107669,
+    "sha256": "0e33ba9faadb6ea77d30141ad3ba15c0548153c3a1f824d7ba83dcf9cb1ef866"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/new_try.py",
+    "role": "adapted source or audit evidence",
+    "sha256": "5e3eaf5fadacdaabfea26bc73c4c486c91e1f0bab09501b6bb2f0166f9c5543c",
+    "bytes": 23308
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/NN_Cylinder_CFD.py",
+    "role": "adapted source or audit evidence",
+    "sha256": "d9f853f046bb370e8ea7b81c7bf943fb55f7bfdd9bcbaf6264d4f7b455fa1d5d",
+    "bytes": 7074
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/evaluate.py",
+    "role": "adapted source or audit evidence",
+    "sha256": "4f92cc5baad70e662a655289d90ae385242f8a353128f01b0b7e791ab6631ae3",
+    "bytes": 38553
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Flow_data_preparison.py",
+    "role": "adapted source or audit evidence",
+    "sha256": "41913290fba456e03450ad8843aeba2dfa4503d55281c67dc9e61e6adbdbfcd1",
+    "bytes": 2820
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Comparison of Cylinder CFD.ipynb",
+    "role": "adapted source or audit evidence",
+    "sha256": "662acbfc72aeeef39533e8fc40edaa52707bfbec39e7fd2c3a04418e536804de",
+    "bytes": 6399684
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/Cylinder Case/Cylinder_Flow_Simulation.py",
+    "role": "adapted source or audit evidence",
+    "sha256": "27b6d76235b18b4baa077237bde2e4196f4900eded2398ec8fcf37143cbf7e12",
+    "bytes": 11182
+  }
+]

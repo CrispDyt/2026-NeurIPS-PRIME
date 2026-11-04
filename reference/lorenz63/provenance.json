@@ -1,0 +1,179 @@
+{
+  "source_root": "NIPS/Lorenz/1-step MSE",
+  "files": [
+    {
+      "source": "NIPS/Lorenz/train_data.npy",
+      "destination": "data/lorenz63/train_data.npy",
+      "sha256": "35bc452193bc2e1db0e4865e34a30995515f842e895f7c8e2ebebae048df3bb9",
+      "bytes": 8128
+    },
+    {
+      "source": "NIPS/Lorenz/test_data.npy",
+      "destination": "data/lorenz63/test_data.npy",
+      "sha256": "57dc742c5ff7be85eb8a89dde81953278f68b2c28f73a022051154667b8da647",
+      "bytes": 16128
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 33/Implicit_BEST.p",
+      "destination": "checkpoints/lorenz63/seed_33/Implicit_BEST.p",
+      "sha256": "b312da6df3790f10ff02757cf951d7a7b2dd02e31c8ac0846d11a602c958167a",
+      "bytes": 236179
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 33/NODE_BEST.p",
+      "destination": "checkpoints/lorenz63/seed_33/NODE_BEST.p",
+      "sha256": "a24da47b0fa7650fa4c3c58236f8af21d94b843ea7803785c5c270f1a47e1d43",
+      "bytes": 259390
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 33/DIM_BEST.pt",
+      "destination": "checkpoints/lorenz63/seed_33/DIM_BEST.pt",
+      "sha256": "c23499b745c1e2d1f12f85da685714dd2cc0e4d5bffdab7dd941e78ea62ef7d6",
+      "bytes": 259482
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 33/DIM_MSE_BEST.pt",
+      "destination": "checkpoints/lorenz63/seed_33/DIM_MSE_BEST.pt",
+      "sha256": "8cc461b9f27be6afe3145a8274bdb5f354e91720654f554d96111b78a23e6207",
+      "bytes": 259626
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 123/Implicit_BEST.p",
+      "destination": "checkpoints/lorenz63/seed_123/Implicit_BEST.p",
+      "sha256": "3da39e4f14c076a04b5faccea8e49bc90f74f365f0b618a2029eb15bb4c61442",
+      "bytes": 236179
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 123/NODE_BEST.p",
+      "destination": "checkpoints/lorenz63/seed_123/NODE_BEST.p",
+      "sha256": "d979ffb5bfac5613e727bdeeadff810f6b468ba4b6ec6e0bf6fefc949315f501",
+      "bytes": 259390
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 123/DIM_BEST.pt",
+      "destination": "checkpoints/lorenz63/seed_123/DIM_BEST.pt",
+      "sha256": "653f27fcdc868723a032a6c0c0797f4895142d7b0a38354d0c005c3a041c0baa",
+      "bytes": 259482
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 123/DIM_MSE_BEST.pt",
+      "destination": "checkpoints/lorenz63/seed_123/DIM_MSE_BEST.pt",
+      "sha256": "27aa2b74411d99ece2c119c3f8513585a1ba2f9b58c82e3ceeb17393388e71a4",
+      "bytes": 259626
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 1000/Implicit_BEST.p",
+      "destination": "checkpoints/lorenz63/seed_1000/Implicit_BEST.p",
+      "sha256": "867e882210c60ae03de088e3550198b7c68141f3816499836186e47e37a4dd6b",
+      "bytes": 236204
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 1000/NODE_BEST.p",
+      "destination": "checkpoints/lorenz63/seed_1000/NODE_BEST.p",
+      "sha256": "b696e62635767714eecb05fba56c5bffb92a1d9bf099ea0833ef5ee851d021ef",
+      "bytes": 259390
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 1000/DIM_BEST.pt",
+      "destination": "checkpoints/lorenz63/seed_1000/DIM_BEST.pt",
+      "sha256": "ca70d9aa5553a45174a6b8839c64ee4c0be0992bb0933eb32379f71889744796",
+      "bytes": 259482
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 1000/DIM_MSE_BEST.pt",
+      "destination": "checkpoints/lorenz63/seed_1000/DIM_MSE_BEST.pt",
+      "sha256": "b406d8ab7afe232ea1ef31c3221b2f45b081c1057beec8e04a7a7edfa124db61",
+      "bytes": 259626
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 13532/Implicit_BEST.p",
+      "destination": "checkpoints/lorenz63/seed_13532/Implicit_BEST.p",
+      "sha256": "842aa6a721eae359f1d5278f7c7241991542f34ba8716911e1b3889a3d680f8b",
+      "bytes": 230164
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 13532/NODE_BEST.p",
+      "destination": "checkpoints/lorenz63/seed_13532/NODE_BEST.p",
+      "sha256": "10010b8f4d285fc03b51cac53b6022fa2451b1ac69311328c9ef20261806aaa9",
+      "bytes": 259390
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 13532/DIM_BEST.pt",
+      "destination": "checkpoints/lorenz63/seed_13532/DIM_BEST.pt",
+      "sha256": "23ea2d5d660881d6dbd0fece0e1b233eb580a99d967439d6c3b1641228d1fc81",
+      "bytes": 259482
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 13532/DIM_MSE_BEST.pt",
+      "destination": "checkpoints/lorenz63/seed_13532/DIM_MSE_BEST.pt",
+      "sha256": "2f96f602b59252730813f9062dca9802eb510e163181ee16ff9606c4af330dba",
+      "bytes": 259626
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 123456/Implicit_BEST.p",
+      "destination": "checkpoints/lorenz63/seed_123456/Implicit_BEST.p",
+      "sha256": "5df5076bbcf3d8d3a0efc52a8dfa3f055313d39eab40c8ed10c810005444992a",
+      "bytes": 236158
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 123456/NODE_BEST.p",
+      "destination": "checkpoints/lorenz63/seed_123456/NODE_BEST.p",
+      "sha256": "75c9570098482438de3757afdda8765c3db0e2afd8eb3e054fdb08800918012f",
+      "bytes": 259390
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 123456/DIM_BEST.pt",
+      "destination": "checkpoints/lorenz63/seed_123456/DIM_BEST.pt",
+      "sha256": "e52d5a51a6dae0c18d047fcdab72d27a6e9ce552062a9bb3ce3e0aa109fb4e4e",
+      "bytes": 259482
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/1-step MSE 123456/DIM_MSE_BEST.pt",
+      "destination": "checkpoints/lorenz63/seed_123456/DIM_MSE_BEST.pt",
+      "sha256": "a77040e8ef9987c39d23bc6a5ad97ed7d22dcee9e0f24179d2b483fda2c916c8",
+      "bytes": 259626
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/eval_5seeds_32starts_full_poincare_results/per_rollout_prediction_metrics_5seeds_32starts.csv",
+      "destination": "reference/lorenz63/per_rollout_prediction_metrics_5seeds_32starts.csv",
+      "sha256": "3e8a9743b9c2087709a74ea1fac7e09eeae9486a0e5b3d88d1c18865ad7cc03e",
+      "bytes": 138077
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/eval_5seeds_32starts_full_poincare_results/per_seed_full_horizon_poincare_metrics.csv",
+      "destination": "reference/lorenz63/per_seed_full_horizon_poincare_metrics.csv",
+      "sha256": "cae8f84e36bbbf2fe98089218b335b6c4b89f157b48e3e45f79dd429287ca910",
+      "bytes": 2739
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/eval_5seeds_32starts_full_poincare_results/summary_combined_prediction_and_full_poincare.csv",
+      "destination": "reference/lorenz63/summary_combined_prediction_and_full_poincare.csv",
+      "sha256": "01c5e6560fb096331ecef889ffec4202675db2a6524f9b08536bacf6630b60e8",
+      "bytes": 3587
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/eval_5seeds_32starts_full_poincare_results/eval_errors.json",
+      "destination": "reference/lorenz63/eval_errors.json",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "bytes": 2
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/Lorenz.ipynb",
+      "sha256": "7ac462b2537f9496510ddf568e214e16386e513156ab06cfe6c50b12ddeb41c8",
+      "bytes": 15975381,
+      "role": "source code provenance; original not bundled"
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/evaluate.py",
+      "sha256": "9fd3cec4694b15433267a67256248993e632eb63f11e21b38ade836014478fcf",
+      "bytes": 44536,
+      "role": "source code provenance; original not bundled"
+    }
+  ],
+  "training_notebook_cells_zero_based": {
+    "MSE": 4,
+    "DIM": 6,
+    "DIM+MSE": 8,
+    "PRIME": 10
+  }
+}

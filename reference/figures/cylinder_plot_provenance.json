@@ -1,0 +1,132 @@
+{
+  "sources": [
+    {
+      "path": "Entropy/Entropy-1/Cylinder Case/Comparison of Cylinder CFD.ipynb",
+      "sha256": "662acbfc72aeeef39533e8fc40edaa52707bfbec39e7fd2c3a04418e536804de"
+    },
+    {
+      "path": "Entropy/Entropy-1/Cylinder Case/Flow_data_preparison.py",
+      "sha256": "41913290fba456e03450ad8843aeba2dfa4503d55281c67dc9e61e6adbdbfcd1"
+    }
+  ],
+  "forecast_notebook_cells_one_based": [
+    17,
+    18
+  ],
+  "forecast_cell_hashes": {
+    "17": "6465725d454341f6bffbe0270d9d6ae3f4df735ab26cff8d601ab5cd9eed8575",
+    "18": "c4381c4baeeeb2ebed45a6f3432d517fe3323308ed74ae4417e77b7d22e2e08a"
+  },
+  "default_settings": {
+    "seed": 100,
+    "start_index": 0,
+    "horizon": 1000,
+    "dt_common": 0.1,
+    "channel": 0,
+    "plot_window": [
+      80,
+      100
+    ],
+    "zoom_window": [
+      86,
+      90
+    ]
+  },
+  "snapshot_settings": {
+    "raw_frame": 4000,
+    "speed_multiplier": 100,
+    "dx": 0.1,
+    "sensor_indices": [
+      [
+        62,
+        12
+      ],
+      [
+        52,
+        44
+      ],
+      [
+        77,
+        15
+      ],
+      [
+        43,
+        35
+      ],
+      [
+        74,
+        35
+      ],
+      [
+        109,
+        40
+      ],
+      [
+        125,
+        15
+      ],
+      [
+        80,
+        35
+      ],
+      [
+        100,
+        20
+      ]
+    ],
+    "noise_std": 0.05,
+    "probe_disk_radius": 0.15
+  },
+  "raw_data_bundled": false,
+  "exact_published_figure_selection_verified": false,
+  "ambiguity": "Earlier notebookcell9 uses older unseeded models/start846; published panel assembly is not recorded.",
+  "validation": {
+    "syntax": true,
+    "cli_help": true,
+    "cpu_forecast": {
+      "passed": true,
+      "array_shapes": {
+        "time": [
+          1001
+        ],
+        "reference": [
+          1001,
+          9
+        ],
+        "PRIME": [
+          1001,
+          9
+        ],
+        "MSE": [
+          1001,
+          9
+        ],
+        "DIM": [
+          1001,
+          9
+        ],
+        "DIM_MSE": [
+          1001,
+          9
+        ]
+      },
+      "device": "cpu",
+      "pdf_bytes": 24365,
+      "png_bytes": 408646
+    },
+    "optional_raw_snapshot_executed": false,
+    "lorenz_generator_short_smoke": {
+      "passed": true,
+      "steps": 100,
+      "train_shape": [
+        5,
+        3
+      ],
+      "test_shape": [
+        5,
+        3
+      ]
+    },
+    "forecast_png_visually_inspected": true
+  }
+}

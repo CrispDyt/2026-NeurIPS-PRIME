@@ -1,0 +1,108 @@
+[
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/lorenz_heterogeneous_baselines/checkpoints/Reservoir-ESN_seed1000.p",
+    "destination": "checkpoints/baselines/Reservoir-ESN_seed1000.p",
+    "bytes": 3948397,
+    "sha256": "9dbb55cc5d9d50f45a093faf6c477287ed9b0ade726664484845081a0c32828c"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/lorenz_heterogeneous_baselines/checkpoints/scaler.pkl",
+    "destination": "checkpoints/baselines/scaler.pkl",
+    "bytes": 359,
+    "sha256": "4c8b847f5c4b4b3d312e485772f9ae45a6303c8e14d162ef0deb21ba78f10b2b"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/lorenz_heterogeneous_baselines/checkpoints/Implicit_BEST.p",
+    "destination": "checkpoints/baselines/Implicit_BEST.p",
+    "bytes": 230164,
+    "sha256": "842aa6a721eae359f1d5278f7c7241991542f34ba8716911e1b3889a3d680f8b"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/lorenz_heterogeneous_baselines/checkpoints/NGRC-NVAR_seed1000.p",
+    "destination": "checkpoints/baselines/NGRC-NVAR_seed1000.p",
+    "bytes": 3948,
+    "sha256": "7c5f7612c912c9a92347a3d826121a7e9835923b10ca91fba727a50e2ffda3ed"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/lorenz_heterogeneous_baselines/checkpoints/Koopman-AE_seed1000.p",
+    "destination": "checkpoints/baselines/Koopman-AE_seed1000.p",
+    "bytes": 176251,
+    "sha256": "b6dbe76d9c56a3e82a64714b4ec0795c9d751a830806b6f2ab77cc7d147f008b"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/lorenz_heterogeneous_baselines/checkpoints/LSTM_seed1000.p",
+    "destination": "checkpoints/baselines/LSTM_seed1000.p",
+    "bytes": 868994,
+    "sha256": "d0e905a046b3ef69fab8a27df8af422034411b19813ac2bfa965370248f38f84"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/lorenz_heterogeneous_baselines/checkpoints/DySLIM-style_seed1000.p",
+    "destination": "checkpoints/baselines/DySLIM-style_seed1000.p",
+    "bytes": 138216,
+    "sha256": "dc380ba4df48f470e75fde66f773d5ec6d9d8a4c5da8a19e77e4335e598f9743"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/1-step MSE/1-step MSE 1000/Implicit_BEST.p",
+    "destination": "checkpoints/baselines/PRIME_figure9_seed1000.p",
+    "bytes": 236204,
+    "sha256": "867e882210c60ae03de088e3550198b7c68141f3816499836186e47e37a4dd6b"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/lorenz_heterogeneous_baselines/run_config.json",
+    "destination": "reference/baselines/run_config.json",
+    "bytes": 997,
+    "sha256": "74ac7c4b9632152cc0367456f61c90ad5a7f94c9f6eebd299b77bab797545641"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/lorenz_heterogeneous_baselines/results_summary.csv",
+    "destination": "reference/baselines/results_summary.csv",
+    "bytes": 3273,
+    "sha256": "18e47477e0cf317105562bb9aa0cbb0ce87910d3f01d37269eaa80fb1ff57714"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/lorenz_heterogeneous_baselines/combined_eval/combined_results_with_PRIME.csv",
+    "destination": "reference/baselines/combined_results_with_PRIME.csv",
+    "bytes": 1497,
+    "sha256": "8ebb6514de476c3c3aab0223b0f1a25446d72123181e176c6072d45a43439fc4"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/lorenz_heterogeneous_baselines.py",
+    "role": "adapted code",
+    "sha256": "41ddc9d684663ed8a2e53cf7e1dbb8db6b2939e7905f629c4d5541b8a49db18b"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/eval_lorenz_heterogeneous_plus_prime.py",
+    "role": "adapted code",
+    "sha256": "b208360187d0a13e0862f6fbeb36b1b3edb89226d582d4784d57528577f1bcb5"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/plot_lorenz_heterogeneous_baselines.py",
+    "role": "adapted code",
+    "sha256": "bb446c4533e86a291160f2bd0a540095656ed0d1497d81977d38b589c492be71"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/plot_lorenz.ipynb",
+    "role": "adapted code",
+    "sha256": "bed17e21cd6883335e9ff2f4da200ff8c4f4caa55ec720e1133354bde4957575"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/run_lorenz_heterogeneous_baselines.sh",
+    "role": "adapted code",
+    "sha256": "57505a560e5ba6002aaadbb004cdb1058e0d7a7096e7660de17a8a5003480a6b"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/train_data.npy",
+    "destination": "data/lorenz63/train_data.npy",
+    "sha256": "35bc452193bc2e1db0e4865e34a30995515f842e895f7c8e2ebebae048df3bb9"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/test_data.npy",
+    "destination": "data/lorenz63/test_data.npy",
+    "sha256": "57dc742c5ff7be85eb8a89dde81953278f68b2c28f73a022051154667b8da647"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/plot_recurrence_section.ipynb",
+    "role": "missing GenericSequentialMap helper from adjacent notebook",
+    "sha256": "40cdb1da069729b0a93d21fc41bff347b876198f50dc41668cbc6d92d1fe192d"
+  }
+]

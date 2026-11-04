@@ -1,0 +1,13 @@
+{
+  "device": "cuda",
+  "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "torch_version": "2.1.2+cu121",
+  "python_version": "3.11.15 (main, Mar 11 2026, 17:20:07) [GCC 14.3.0]",
+  "platform": "Linux-6.16.3-76061603-generic-x86_64-with-glibc2.35",
+  "cpu_threads": null,
+  "batch_size": 1,
+  "rollout_steps": 1000,
+  "warmup_runs": 5,
+  "timed_repeats": 20,
+  "timing_scope": "Core 1000-step autoregressive rollout only; checkpoint loading, data loading, input scaling, inverse scaling, and metrics are excluded."
+}

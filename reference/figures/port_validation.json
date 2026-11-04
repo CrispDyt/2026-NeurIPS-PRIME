@@ -1,0 +1,59 @@
+{
+  "device": "cpu",
+  "checks": [
+    {
+      "script": "lorenz_phase_return.py",
+      "status": "passed",
+      "horizon": 999,
+      "checkpoint_selection": "main-table folder13532 explicit inputs; not verified originalfigure1cohort"
+    },
+    {
+      "script": "lorenz_collapse.py",
+      "status": "passed",
+      "starts": 30,
+      "horizon": 1000,
+      "render_inspected": true
+    },
+    {
+      "script": "lorenz_30_rollouts.py",
+      "status": "passed",
+      "starts": 30,
+      "horizon": 1000
+    },
+    {
+      "script": "lorenz_multistep_rollouts.py",
+      "status": "passed",
+      "starts": 30,
+      "horizon": 1000
+    },
+    {
+      "script": "ks_one_step_rollouts.py",
+      "status": "passed",
+      "starts": 30,
+      "horizon": 2000
+    },
+    {
+      "script": "ks_multistep_rollouts.py",
+      "status": "passed",
+      "starts": 30,
+      "horizon": 2000,
+      "render_inspected": true
+    },
+    {
+      "script": "../rossler/train_dim.py",
+      "status": "passed",
+      "steps": 2,
+      "channels": [
+        0,
+        2
+      ]
+    },
+    {
+      "script": "../rossler/compare_delay.py",
+      "status": "passed",
+      "starts": 2,
+      "horizon": 10
+    }
+  ],
+  "scope": "Execution/render checks; original figure modelcohorts andfailurecounts notverified; nofulltraining"
+}

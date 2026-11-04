@@ -1,0 +1,2 @@
+q_speed,n_seeds_ok,seeds,N_hits_mean,N_hits_std,tau_mean_steps_mean,tau_mean_steps_std,NMSE_500_mean_over_seeds,NMSE_500_std_over_seeds,Attractor_W2_mean_over_seeds,Attractor_W2_std_over_seeds,PSD_logL1_mean_over_seeds,PSD_logL1_std_over_seeds,NMSE_500,Attractor_W2,PSD_logL1
+0.2,5,"123,456,789,2024,3407",74.2,1.7888543819998317,6.702561300833923,0.16337274857427037,0.3326189709458198,0.08555079988315714,17.245342582066854,18.19779415849239,1.8990551247386454,2.0619404557381884,0.3326 ± 0.08555,17.25 ± 18.2,1.899 ± 2.062

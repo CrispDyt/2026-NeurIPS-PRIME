@@ -1,0 +1,73 @@
+[
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/Euler-NODE/NODE_BEST.p",
+    "destination": "checkpoints/figures/lorenz_mse20.p",
+    "sha256": "2b96f6c06ab5322335a182079138282c76a0318589f17d96555cb2aec67f1268"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/KS/multi/node_multi_BEST.pt",
+    "destination": "checkpoints/figures/ks_mse20.pt",
+    "sha256": "6060cb6659936d6f7a9acdff24c476d7336cda8a68b75efa9ca3c222736ab016"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/1-step MSE/Lorenz.ipynb",
+    "cells": [
+      26,
+      27,
+      30
+    ],
+    "sha256": "7ac462b2537f9496510ddf568e214e16386e513156ab06cfe6c50b12ddeb41c8"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/1-step MSE/Lorenz.ipynb",
+    "cells": [
+      32
+    ],
+    "sha256": "7ac462b2537f9496510ddf568e214e16386e513156ab06cfe6c50b12ddeb41c8"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/Euler-NODE/Lorenz.ipynb",
+    "cells": [
+      15
+    ],
+    "sha256": "14c7da0984679d9eb8d4fb8cd2b648e926557524d6a3aff9ab74e232962c3fd0"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/KS/plot.ipynb",
+    "cells": [
+      0
+    ],
+    "sha256": "593d94527445567a647374138d6c9a281a10bf8be93ee3ff7c74b187f8ac6190"
+  },
+  {
+    "source": "/home/chrisduan/Entropy/Entropy-1/KS/plot.ipynb",
+    "cells": [
+      2
+    ],
+    "sha256": "593d94527445567a647374138d6c9a281a10bf8be93ee3ff7c74b187f8ac6190"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Lorenz/1-step MSE/Lorenz.ipynb",
+    "cells": [
+      23
+    ],
+    "sha256": "7ac462b2537f9496510ddf568e214e16386e513156ab06cfe6c50b12ddeb41c8"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Fullstate/Rossler_fullstate_test.ipynb",
+    "cells": [
+      7
+    ],
+    "sha256": "18c5ce83ea5773c2e22ddc896b8003acad47a2a543609e700a40f607f7ea150e"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Fullstate/train_data.npy",
+    "destination": "data/rossler/train_data.npy",
+    "sha256": "647dad8e14d43cb43eaf180480489ce6717b2632ababb4627dd606a42fa6e47d"
+  },
+  {
+    "source": "/home/chrisduan/NIPS/Fullstate/test_data.npy",
+    "destination": "data/rossler/test_data.npy",
+    "sha256": "b7bbf9b4688b767c86a10612fd37a33652bd00d4a100a9ae1030813ba6661bef"
+  }
+]

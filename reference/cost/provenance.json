@@ -1,0 +1,107 @@
+{
+  "source": "NIPS/Lorenz/Computational_Cost.py (identical to Entropy/Entropy-1/KS/Computational_Cost.py)",
+  "source_sha256": "a889b7986ef6e5c254c95777f84a40068dba8348555b1be4e4d44fcaef838b03",
+  "files": [
+    {
+      "source": "NIPS/Lorenz/computational_cost_lorenz/computational_cost_raw.csv",
+      "destination": "reference/cost/lorenz/computational_cost_raw.csv",
+      "sha256": "8ed4fae606f4e15c0fa9eb46f7ed160b333ee5c61a7097f1459c33254f67a401"
+    },
+    {
+      "source": "NIPS/Lorenz/computational_cost_lorenz/computational_cost_summary.md",
+      "destination": "reference/cost/lorenz/computational_cost_summary.md",
+      "sha256": "88aeec576e126b62b9b863463faee30b3971f8dfc48b27bc6c3d0e084376381d"
+    },
+    {
+      "source": "NIPS/Lorenz/computational_cost_lorenz/computational_cost_summary.csv",
+      "destination": "reference/cost/lorenz/computational_cost_summary.csv",
+      "sha256": "adf5c5cd7c0e72856802104b0e0c9e5b3a3c4ebbd3afacba28ccdbae48cdb7da"
+    },
+    {
+      "source": "Entropy/Entropy-1/KS/computational_cost_ks/computational_cost_raw.csv",
+      "destination": "reference/cost/ks/computational_cost_raw.csv",
+      "sha256": "8a88b39651dfccae02034b69c1fd15d06ff895479c87d2bbec956426abee9d40"
+    },
+    {
+      "source": "Entropy/Entropy-1/KS/computational_cost_ks/computational_cost_summary.md",
+      "destination": "reference/cost/ks/computational_cost_summary.md",
+      "sha256": "bbe4735e7fe0cdb659e6619b472a10c8f29f67633a749b014e656b877fd16b41"
+    },
+    {
+      "source": "Entropy/Entropy-1/KS/computational_cost_ks/computational_cost_summary.csv",
+      "destination": "reference/cost/ks/computational_cost_summary.csv",
+      "sha256": "75d252b7b3e3195ba2d0db4aed3bc8c7548486567e3c91a5aa07347be1973034"
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/inference_time_per_checkpoint.csv",
+      "destination": "reference/cost/inference_time_per_checkpoint.csv",
+      "sha256": "aa836b43b28a47eb6a6619778ce1d87883c9a311b90aad5a7773927f7c9af248"
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/inference_time_summary_by_method.csv",
+      "destination": "reference/cost/inference_time_summary_by_method.csv",
+      "sha256": "f86d16745121530ce7dc871ef0e3c5be3506bce7bf3dca854e87a975e581863b"
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/inference_time_metadata.json",
+      "destination": "reference/cost/inference_time_metadata.json",
+      "sha256": "39d216cdaf1532a72bace184982c26858c39e63a98df18a455a00ba70051bf22"
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/heterogeneous_training_time_benchmark/training_time_per_seed.csv",
+      "destination": "reference/cost/heterogeneous/training_time_per_seed.csv",
+      "sha256": "5dc438685fefbc3e26afdec94421e0daa6e272b402840d84bed0586feb624291"
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/heterogeneous_training_time_benchmark/training_time_summary.csv",
+      "destination": "reference/cost/heterogeneous/training_time_summary.csv",
+      "sha256": "023ad6a6737cf41220cb2bdcff3fd84e6a7de0e951cbc5169158eca02104147e"
+    },
+    {
+      "source": "NIPS/Lorenz/1-step MSE/heterogeneous_training_time_benchmark/training_time_metadata.json",
+      "destination": "reference/cost/heterogeneous/training_time_metadata.json",
+      "sha256": "cd3602968e714ed18e602f32a28407a9989052e86cf19ca38249c5ba465726f4"
+    }
+  ],
+  "inference_notebook": "NIPS/Lorenz/1-step MSE/pP3L_Rebuttal.ipynb, cell 5",
+  "inference_cell_sha256": "32f632786318304ce332ee7ab6e6a08b74cf32d95699e871d1e0b013519c859d",
+  "heterogeneous_timing": {
+    "source": "NIPS/Lorenz/1-step MSE/pP3L_Rebuttal.ipynb",
+    "cell_index_zero_based": 6,
+    "cell_sha256": "ec719c6dd9c2f02f623450198db9a95f3e8b91617c1e40afe07be1329804037c",
+    "uncommented_source_sha256": "a740c2d2b321990430f17d04a841b13bfb9ba4de956d27427b7ca83de0e7c52d",
+    "reused_baseline_definitions_ast_identical": [
+      "set_seed",
+      "load_array",
+      "select_obs",
+      "make_delay_windows",
+      "sample_batch_indices",
+      "ModelConfig",
+      "BaseRolloutModel",
+      "nvar_features",
+      "NVARModel",
+      "train_nvar",
+      "ESNModel",
+      "train_esn",
+      "LSTMForecaster",
+      "LSTMRolloutModel",
+      "KoopmanAE",
+      "KoopmanRolloutModel",
+      "MLPMap",
+      "DySLIMRolloutModel",
+      "train_lstm",
+      "train_koopman_ae",
+      "imq_mmd2",
+      "train_dyslim_style",
+      "save_model",
+      "train_one_baseline"
+    ],
+    "adaptations": [
+      "portable CLI and paths",
+      "reuse exact baseline definitions instead of duplicating module",
+      "remove IPython Styler and to_markdown displays",
+      "optional saving after timer",
+      "failure exit status and runtime/data hashes"
+    ]
+  }
+}

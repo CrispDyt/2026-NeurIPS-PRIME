@@ -1,0 +1,5 @@
+N_hits,best_total,best_total_L1,best_total_L2_raw,best_total_iter,clock_jitter_frac,final_L1,final_L2_raw,final_L_total,final_cumulative_K_drift,max_abs_cumulative_K_drift,max_abs_relative_K_error,mean_abs_relative_K_error,mode,selected_checkpoint,selected_source
+71,,,,,0.0,0.05968895182013512,0.0,0.05968895182013512,0.0,0.0,0.0,0.0,dim_only,lorenz_clock_robustness/dim_only_seed1000/ClockRobust_dim_only_seed1000_SELECTED_20260504_102919.p,FINAL_DIM_ONLY
+71,,,,,0.0,0.07613527774810791,0.0,0.07613527774810791,0.0,0.0,0.0,0.0,exact_k,lorenz_clock_robustness/exact_k_seed1000/ClockRobust_exact_k_seed1000_SELECTED_20260504_103939.p,BEST_TOTAL
+71,,,,,0.1,0.08127795904874802,0.0,0.08127795904874802,-11.0,11.0,0.2,0.07264692240532578,jitter_k_10,lorenz_clock_robustness/jitter_k_10_seed1000/ClockRobust_jitter_k_10_seed1000_SELECTED_20260504_104953.p,BEST_TOTAL
+71,,,,,0.2,0.07724859565496445,0.0,0.07724859565496445,2.0,13.0,0.42857142857142855,0.1507232963115316,jitter_k_20,lorenz_clock_robustness/jitter_k_20_seed1000/ClockRobust_jitter_k_20_seed1000_SELECTED_20260504_110028.p,BEST_TOTAL

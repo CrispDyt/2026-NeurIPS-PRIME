@@ -1,0 +1,30 @@
+{
+  "four_objective_training_smoke": "two updates each; original manifests inspected during curation",
+  "cpu_evaluation_smoke": {
+    "prediction_rows": 1,
+    "poincare_rows": 3,
+    "error_count": 0
+  },
+  "cuda_full_horizon_prime_seed100_start0": {
+    "prediction_horizon": 500,
+    "poincare_horizon": 1000,
+    "prediction_absolute_differences": {
+      "NMSE_20": 0.0,
+      "NMSE_100": 0.0,
+      "NMSE_400": 0.0,
+      "Attractor_W2": 2.7939677238464355e-09,
+      "PSD_logL1": 0.0,
+      "TCM": 3.0531133177191805e-16
+    },
+    "drtd_absolute_differences": {
+      "Sigma1_u0_4": 0.0,
+      "Sigma2_u3_4": 0.0,
+      "Sigma3_u2_4": 0.0
+    }
+  },
+  "integration_changes": [
+    "refuse existing evaluation output",
+    "GeomLoss runtime failures propagate instead of substituting sliced distance"
+  ],
+  "full_retraining_performed": false
+}

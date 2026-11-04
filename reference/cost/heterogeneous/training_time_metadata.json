@@ -1,0 +1,63 @@
+{
+  "train_path": "/home/chrisduan/NIPS/Lorenz/train_data.npy",
+  "test_path": "/home/chrisduan/NIPS/Lorenz/test_data.npy",
+  "train_shape_used": [
+    500,
+    2
+  ],
+  "test_shape_used": [
+    1000,
+    2
+  ],
+  "selected_observation_rule": "all columns if d=2, otherwise Lorenz columns [0,2]",
+  "device": "cuda",
+  "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "python_version": "3.11.15 (main, Mar 11 2026, 17:20:07) [GCC 14.3.0]",
+  "torch_version": "2.1.2+cu121",
+  "numpy_version": "1.26.0",
+  "seeds": [
+    33,
+    123,
+    123456,
+    1000,
+    13532
+  ],
+  "models": [
+    "ngrc",
+    "esn",
+    "lstm",
+    "koopman",
+    "dyslim"
+  ],
+  "base_args": {
+    "dt_obs": 0.1,
+    "seq_len": 10,
+    "steps": 4000,
+    "batch_size": 256,
+    "lr": 0.001,
+    "grad_clip": 1.0,
+    "print_every": 500,
+    "rollout_clip": 50.0,
+    "nvar_order": 2,
+    "nvar_ridge": 0.001,
+    "nvar_feature_clip": 20.0,
+    "esn_size": 700,
+    "esn_spectral_radius": 0.9,
+    "esn_leak": 0.3,
+    "esn_input_scale": 0.5,
+    "esn_density": 0.05,
+    "esn_ridge": 1e-05,
+    "esn_washout": 100,
+    "lstm_hidden": 128,
+    "lstm_layers": 2,
+    "koopman_hidden": 128,
+    "koopman_latent": 16,
+    "koopman_recon_w": 0.25,
+    "koopman_latent_w": 0.1,
+    "dyslim_hidden": 128,
+    "dyslim_rollout": 16,
+    "dyslim_mmd_w": 0.2
+  },
+  "timing_scope": "Model construction and pure training only. Data loading, scaling, checkpoint saving, evaluation, and plotting are excluded.",
+  "important_caveat": "DySLIM-style is the practical MMD implementation in the uploaded script, not the verbatim official JAX implementation. NGRC and ESN are closed-form NumPy/CPU methods, whereas the neural baselines use iterative PyTorch training."
+}

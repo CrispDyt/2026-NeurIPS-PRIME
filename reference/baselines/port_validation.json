@@ -1,0 +1,27 @@
+{
+  "fresh_training_smoke": {
+    "models": [
+      "NGRC-NVAR",
+      "Reservoir-ESN",
+      "LSTM",
+      "Koopman-AE",
+      "DySLIM-style"
+    ],
+    "rows": 5,
+    "neural_updates": 2,
+    "ridge_models": "original direct solves",
+    "evaluation_starts": 1,
+    "evaluation_horizon": 400
+  },
+  "archived_evaluation_smoke": {
+    "rows": 6,
+    "starts": 1,
+    "horizon": 400,
+    "device": "cpu"
+  },
+  "figure9_smoke": {
+    "horizon": 20,
+    "render_inspected": true
+  },
+  "full_retraining_performed": false
+}
