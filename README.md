@@ -1,6 +1,8 @@
 # PRIME
 
-Code and archived experiment inputs for **PRIME: Poincaré return induced measure for learning partially observed dynamical systems**.
+Code and archived experiment inputs for NeuIPS 2026 Poster: 
+
+**PRIME: Poincaré return induced measure for learning partially observed dynamical systems**.
 
 This repository collects the paper-related implementations. It includes training and evaluation for Lorenz63, Kuramoto–Sivashinsky (KS), and flow past a cylinder, together with selected baseline, ablation, and code for plotting. 
 
